@@ -1,37 +1,70 @@
-## Welcome to GitHub Pages
+# 豆奶与程序猫 · 技术博客
 
-You can use the [editor on GitHub](https://github.com/Maomaonihao/Maomaonihao.github.io/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+> Android 系统开发 / Flutter / Vue / AI 编程的实战笔记与学习路线。
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+🌐 **在线访问**：https://soycodetrail.github.io
 
-### Markdown
+---
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## 👋 关于我 / 关注我
 
-```markdown
-Syntax highlighted code block
+我是 **豆奶与程序猫**，一个喜欢把踩过的坑写成笔记的技术人。如果文章内容对你有帮助，欢迎在下面任意平台找到我，一起交流学习 👇
 
-# Header 1
-## Header 2
-### Header 3
+| 平台 | 账号 / 方式 |
+|------|------------|
+| 💬 **微信** | `Yishisiweikongjian`（扫码或搜索添加，备注「学习」更快通过） |
+| 📕 **小红书** | [豆奶与程序猫](https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB)（搜索关注，私信“邀请码”领取学习资源） |
+| 📧 **邮箱** | 1019296134@qq.com |
+| 💻 **GitHub** | [@soycodetrail](https://github.com/soycodetrail) |
 
-- Bulleted
-- List
+> 每篇文章的**末尾**都放了微信二维码和小红书入口，看到喜欢的文章顺手关注一下就好～
 
-1. Numbered
-2. List
+---
 
-**Bold** and _Italic_ and `Code` text
+## 📚 文章导航（31 篇）
 
-[Link](url) and ![Image](src)
+博客内容涵盖以下几条主线，完整列表见站点 [首页](https://soycodetrail.github.io) 与 [标签页](https://soycodetrail.github.io/tags/)：
+
+- **Android 系统 / Framework**：AOSP 源码下载与编译、SystemUI、Launcher3 系列（架构 / 布局 / 数据模型 / 拖拽 / 动画 / 通知 等 15 篇）、Boot 到 Launcher 全流程
+- **跨端开发**：Flutter 全栈指南、Flutter 多端架构、Dart/动画
+- **前端 / 全栈**：Vue3 + Supabase + Nginx 个人博客搭建、Vibe Coding 建站
+- **AI / 编程入门**：零基础学 AI 与编程路线、LLM Agent 开发、Claude Code 图表技能、Vibe Coding 工具集
+
+---
+
+## 🛠️ 技术栈
+
+- 静态站点生成器：[Hexo](https://hexo.io)
+- 托管：[GitHub Pages](https://pages.github.com)（用户页 `soycodetrail.github.io`）
+- 自动部署：GitHub Actions（push 到 `master` 自动构建并发布）
+- RSS 订阅：`/atom.xml` · 站点地图：`/sitemap.xml`
+
+---
+
+## 💻 本地预览 / 修改
+
+```bash
+npm install          # 安装依赖
+npm run server       # 本地预览 http://localhost:4000
+npm run build        # 生成静态文件到 public/
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+新增文章：把 `.md` 文件放进 `source/_posts/`，frontmatter 示例：
 
-### Jekyll Themes
+```markdown
+---
+title: 文章标题
+category: client          # 分类
+tags: ["标签1", "标签2"]
+readTime: 15分钟
+date: 2026-08-11
+---
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Maomaonihao/Maomaonihao.github.io/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+正文…
+```
 
-### Support or Contact
+---
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+## 📄 许可证
+
+文章版权归作者所有，转载请注明出处并保留署名。

@@ -1,0 +1,8 @@
+<section class="taxonomy">
+  <h1 class="page-title">🏷️ 全部标签</h1>
+  <div class="tag-cloud">
+    <% site.tags.each(function(tag){ %>
+      <a class="tag" href="<%= url_for(tag.path) %>">#<%= tag.name %> <span class="tag-count"><%= tag.length %></span></a>
+    <% }) %>
+  </div>
+</section>

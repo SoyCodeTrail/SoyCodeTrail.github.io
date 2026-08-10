@@ -1,1 +1,65 @@
-theme: jekyll-theme-merlot
+# ============================================================
+# Hexo 配置 —— 豆奶与程序猫的技术博客
+# ============================================================
+title: 豆奶与程序猫的技术博客
+subtitle: Android / Flutter / Vue / AI 实战笔记
+description: 豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。
+author: 豆奶与程序猫
+language: zh-CN
+timezone: Asia/Shanghai
+
+# 站点地址（GitHub Pages 用户页）
+url: https://soycodetrail.github.io
+root: /
+
+# 文章永久链接
+permalink: :year/:month/:day/:title/
+permalink_defaults:
+
+# 目录
+source_dir: source
+public_dir: public
+tag_dir: tags
+archive_dir: archives
+category_dir: categories
+code_dir: downloads/code
+
+# 写作
+new_post_name: :title.md
+default_layout: post
+titlecase: false
+external_link:
+  enable: true
+  field: site
+  exclude: ''
+filename_case: 0
+render_drafts: false
+post_asset_folder: false
+relative_link: false
+future: true
+
+# 分页
+per_page: 10
+pagination_dir: page
+
+# 主题
+theme: soyblog
+
+# 部署由 GitHub Actions 完成，无需本地 deployer
+# deploy: {}
+
+# RSS 订阅
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
+  content: true
+  content_limit: 0
+  content_limit_delim: ' '
+
+# 站点地图（SEO）
+sitemap:
+  path: sitemap.xml
+
+# 不渲染的文件
+skip_render:

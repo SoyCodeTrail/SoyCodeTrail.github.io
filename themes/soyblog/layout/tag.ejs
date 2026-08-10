@@ -1,0 +1,10 @@
+<section class="taxonomy">
+  <h1 class="page-title"><%= page.title %></h1>
+  <% page.posts.each(function(post){ %>
+    <article class="archive-item">
+      <time class="archive-item__date"><%= date(post.date, 'YYYY-MM-DD') %></time>
+      <a class="archive-item__title" href="<%= url_for(post.path) %>"><%= post.title %></a>
+    </article>
+  <% }) %>
+  <%- paginator() %>
+</section>

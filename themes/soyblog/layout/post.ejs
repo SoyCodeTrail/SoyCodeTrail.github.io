@@ -1,0 +1,47 @@
+<article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><%= page.title %></h1>
+    <div class="post-meta">
+      <span>📅 <%= date(page.date, 'YYYY-MM-DD') %></span>
+      <% if (page.author) { %><span>✍️ <%= page.author %></span><% } %>
+      <% if (page.readTime) { %><span>⏱️ <%= page.readTime %></span><% } %>
+      <% if (page.category) { %><span>📂 <%= page.category %></span><% } %>
+    </div>
+    <div class="post-tags">
+      <% (page.tags || []).each(function(tag){ %>
+        <a class="tag" href="<%= url_for(tag.path) %>">#<%= tag.name %></a>
+      <% }) %>
+    </div>
+  </header>
+
+  <div class="post-content">
+    <%- page.content %>
+  </div>
+
+  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+  <section class="follow-card">
+    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+    <div class="follow-grid">
+      <div class="follow-block">
+        <img src="<%= url_for('images/wechat-qrcode.jpeg') %>" alt="微信二维码" class="follow-qr">
+        <div class="follow-text">
+          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+        </div>
+      </div>
+      <div class="follow-block">
+        <div class="follow-text">
+          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+  </section>
+
+  <nav class="post-nav">
+    <% if (page.prev) { %><a class="post-nav__prev" href="<%= url_for(page.prev.path) %>">← <%= page.prev.title %></a><% } %>
+    <% if (page.next) { %><a class="post-nav__next" href="<%= url_for(page.next.path) %>"><%= page.next.title %> →</a><% } %>
+  </nav>
+</article>

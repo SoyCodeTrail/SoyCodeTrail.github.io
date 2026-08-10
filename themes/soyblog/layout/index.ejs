@@ -1,0 +1,31 @@
+<section class="home">
+  <div class="home-intro">
+    <h1 class="home-title"><%= config.title %></h1>
+    <p class="home-sub"><%= config.subtitle %></p>
+    <p class="home-desc"><%= config.description %></p>
+  </div>
+
+  <div class="post-list">
+    <% page.posts.each(function(post){ %>
+      <article class="post-card">
+        <h2 class="post-card__title">
+          <a href="<%= url_for(post.path) %>"><%= post.title %></a>
+        </h2>
+        <div class="post-card__meta">
+          <span>📅 <%= date(post.date, 'YYYY-MM-DD') %></span>
+          <% if (post.author) { %><span>✍️ <%= post.author %></span><% } %>
+          <% if (post.readTime) { %><span>⏱️ <%= post.readTime %></span><% } %>
+          <% if (post.category) { %><span>📂 <%= post.category %></span><% } %>
+        </div>
+        <p class="post-card__excerpt"><%= post.excerpt ? post.excerpt : auto_excerpt(post.content, 110) %></p>
+        <div class="post-card__tags">
+          <% (post.tags || []).each(function(tag){ %>
+            <a class="tag" href="<%= url_for(tag.path) %>">#<%= tag.name %></a>
+          <% }) %>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+
+  <%- paginator() %>
+</section>

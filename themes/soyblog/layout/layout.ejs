@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="<%= config.language %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><% if (page.title) { %><%= page.title %> | <% } %><%= config.title %></title>
+  <meta name="description" content="<%= page.description || config.description %>">
+  <meta name="author" content="<%= config.author %>">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="<%= page.title || config.title %>">
+  <meta property="og:description" content="<%= page.description || config.description %>">
+  <meta property="og:url" content="<%= page.permalink || config.url %>">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="<%= url_for('css/style.css') %>">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link rel="alternate" type="application/atom+xml" title="<%= config.title %>" href="<%= url_for('atom.xml') %>">
+  <link rel="sitemap" href="<%= url_for('sitemap.xml') %>" type="application/xml">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-title" href="<%= url_for('/') %>"><%= config.title %></a>
+      <nav class="site-nav">
+        <a href="<%= url_for('/') %>">首页</a>
+        <a href="<%= url_for('/archives') %>">归档</a>
+        <a href="<%= url_for('/tags') %>">标签</a>
+        <a href="<%= url_for('/about') %>">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container site-main">
+    <%- body %>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <%= date(new Date(), 'YYYY') %> <%= config.author %> · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 · 托管于 GitHub Pages</p>
+      <p class="footer-social">
+        <a href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">📕 小红书：豆奶与程序猫</a>
+        <span>·</span>
+        <a href="https://github.com/soycodetrail" target="_blank" rel="noopener">💻 GitHub</a>
+        <span>·</span>
+        <a href="<%= url_for('atom.xml') %>" target="_blank" rel="noopener">📰 RSS</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
