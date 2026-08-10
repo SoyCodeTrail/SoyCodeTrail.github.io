@@ -4,3 +4,6 @@ public/
 .deploy_git/
 *.log
 .DS_Store
+
+# Hexo 临时数据库
+db.json
