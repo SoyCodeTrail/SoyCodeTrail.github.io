@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一台服务器搭起个人技术博客：Vue3 + Supabase + Nginx 全栈实战 | 豆奶与程序猫的技术博客</title>
+  <meta name="description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta name="author" content="豆奶与程序猫">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="一台服务器搭起个人技术博客：Vue3 + Supabase + Nginx 全栈实战">
+  <meta property="og:description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta property="og:url" content="https://soycodetrail.github.io/2026/07/28/build-personal-website/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
+  <link rel="sitemap" href="/sitemap.xml" type="application/xml">
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
+      <nav class="site-nav">
+        <a href="/">首页</a>
+        <a href="/archives">归档</a>
+        <a href="/tags">标签</a>
+        <a href="/about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container site-main">
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">一台服务器搭起个人技术博客：Vue3 + Supabase + Nginx 全栈实战</h1>
+    <div class="post-meta">
+      <span>📅 2026-07-28</span>
+      
+      <span>⏱️ 20分钟</span>
+      
+    </div>
+    <div class="post-tags">
+      
+        <a class="tag" href="/tags/Vue3/">#Vue3</a>
+      
+        <a class="tag" href="/tags/Nginx/">#Nginx</a>
+      
+        <a class="tag" href="/tags/Supabase/">#Supabase</a>
+      
+        <a class="tag" href="/tags/%E9%83%A8%E7%BD%B2/">#部署</a>
+      
+        <a class="tag" href="/tags/%E5%85%A8%E6%A0%88/">#全栈</a>
+      
+    </div>
+  </header>
+
+  <div class="post-content">
+    <p>一台云服务器（2 核 2G 就够），一个 Vue3 前端，一个 Supabase 后端，一个 Nginx 做反向代理——整套个人技术博客就跑起来了。这篇文章把从零到上线的完整流程拆开讲，包括前端构建、后端配置、Nginx 反代、博客发布系统。</p>
+<h2 id="技术选型：为什么是这套组合"><a href="#技术选型：为什么是这套组合" class="headerlink" title="技术选型：为什么是这套组合"></a>技术选型：为什么是这套组合</h2><table>
+<thead>
+<tr>
+<th>层</th>
+<th>技术</th>
+<th>选型理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>前端</td>
+<td>Vue 3 + Vite</td>
+<td>轻量、构建快、生态成熟</td>
+</tr>
+<tr>
+<td>后端</td>
+<td>Supabase（PostgreSQL）</td>
+<td>免费额度够用、自带认证和 REST API、不用自己维护数据库</td>
+</tr>
+<tr>
+<td>AI 服务</td>
+<td>智谱 GLM API</td>
+<td>国内可直连、有免费额度</td>
+</tr>
+<tr>
+<td>Web 服务器</td>
+<td>Nginx</td>
+<td>静态文件 + 反向代理，2G 内存跑得飞起</td>
+</tr>
+<tr>
+<td>服务器</td>
+<td>腾讯云轻量 2C2G</td>
+<td>便宜、香港节点免备案</td>
+</tr>
+</tbody></table>
+<p>核心思路：<strong>前端是纯静态文件（dist&#x2F;），后端用 Supabase 云数据库，服务器只跑 Nginx + 一个 Node.js AI 代理</strong>。这样服务器负载极低，2G 内存绰绰有余。</p>
+<h2 id="第一步：服务器准备"><a href="#第一步：服务器准备" class="headerlink" title="第一步：服务器准备"></a>第一步：服务器准备</h2><h3 id="买服务器"><a href="#买服务器" class="headerlink" title="买服务器"></a>买服务器</h3><p>腾讯云&#x2F;阿里云的轻量应用服务器都行，选最便宜的 2 核 2G。如果不想备案，选香港或海外节点。</p>
+<p>系统选 Ubuntu 22.04 LTS。</p>
+<h3 id="初始化-SSH"><a href="#初始化-SSH" class="headerlink" title="初始化 SSH"></a>初始化 SSH</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 本地生成密钥对（如果还没有）</span></span><br><span class="line">ssh-keygen -t ed25519 -C <span class="string">&quot;your_email@example.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 通过云控制台的 VNC 终端登录服务器，添加公钥</span></span><br><span class="line"><span class="built_in">mkdir</span> -p ~/.ssh &amp;&amp; <span class="built_in">chmod</span> 700 ~/.ssh</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;你的公钥内容&#x27;</span> &gt;&gt; ~/.ssh/authorized_keys</span><br><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+
+<p>然后本地配 SSH 别名，省得每次输 IP：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ~/.ssh/config</span></span><br><span class="line">Host my-server</span><br><span class="line">    HostName 你的服务器IP</span><br><span class="line">    User ubuntu</span><br><span class="line">    IdentityFile ~/.ssh/id_ed25519</span><br></pre></td></tr></table></figure>
+
+<p>之后 <code>ssh my-server</code> 就能连上。</p>
+<h3 id="禁用密码登录（安全加固）"><a href="#禁用密码登录（安全加固）" class="headerlink" title="禁用密码登录（安全加固）"></a>禁用密码登录（安全加固）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 服务器上</span></span><br><span class="line"><span class="built_in">sudo</span> sed -i <span class="string">&#x27;s/PasswordAuthentication yes/PasswordAuthentication no/&#x27;</span> /etc/ssh/sshd_config</span><br><span class="line"><span class="built_in">sudo</span> systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+<h2 id="第二步：前端项目搭建"><a href="#第二步：前端项目搭建" class="headerlink" title="第二步：前端项目搭建"></a>第二步：前端项目搭建</h2><h3 id="创建-Vue3-项目"><a href="#创建-Vue3-项目" class="headerlink" title="创建 Vue3 项目"></a>创建 Vue3 项目</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm create vite@latest my-blog -- --template vue-ts</span><br><span class="line"><span class="built_in">cd</span> my-blog</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装核心依赖"><a href="#安装核心依赖" class="headerlink" title="安装核心依赖"></a>安装核心依赖</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Supabase 客户端</span></span><br><span class="line">npm install @supabase/supabase-js</span><br><span class="line"></span><br><span class="line"><span class="comment"># 路由和状态管理</span></span><br><span class="line">npm install vue-router pinia</span><br><span class="line"></span><br><span class="line"><span class="comment"># Markdown 渲染（博客文章用）</span></span><br><span class="line">npm install markdown-it</span><br><span class="line"></span><br><span class="line"><span class="comment"># UI 增强</span></span><br><span class="line">npm install highlight.js katex</span><br></pre></td></tr></table></figure>
+
+<h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">src/</span><br><span class="line">├── views/           # 页面组件</span><br><span class="line">│   ├── HomeView.vue</span><br><span class="line">│   ├── BlogCategoryView.vue   # 博客分类页</span><br><span class="line">│   └── BlogPostView.vue       # 文章详情页</span><br><span class="line">├── api/</span><br><span class="line">│   └── blog.ts      # Supabase 文章查询</span><br><span class="line">├── data/</span><br><span class="line">│   └── blog.ts      # 分类/平台静态数据</span><br><span class="line">├── router/</span><br><span class="line">│   └── index.ts     # 路由配置</span><br><span class="line">├── layouts/</span><br><span class="line">│   └── AppLayout.vue # 导航布局</span><br><span class="line">└── lib/</span><br><span class="line">    └── supabase.ts   # Supabase 客户端</span><br></pre></td></tr></table></figure>
+
+<h3 id="Supabase-客户端配置"><a href="#Supabase-客户端配置" class="headerlink" title="Supabase 客户端配置"></a>Supabase 客户端配置</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/lib/supabase.ts</span></span><br><span class="line"><span class="keyword">import</span> &#123; createClient &#125; <span class="keyword">from</span> <span class="string">&#x27;@supabase/supabase-js&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> supabaseUrl = <span class="keyword">import</span>.<span class="property">meta</span>.<span class="property">env</span>.<span class="property">VITE_SUPABASE_URL</span></span><br><span class="line"><span class="keyword">const</span> supabaseAnonKey = <span class="keyword">import</span>.<span class="property">meta</span>.<span class="property">env</span>.<span class="property">VITE_SUPABASE_ANON_KEY</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> supabase = <span class="title function_">createClient</span>(supabaseUrl, supabaseAnonKey)</span><br></pre></td></tr></table></figure>
+
+<p>环境变量 <code>.env.production</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">VITE_SUPABASE_URL=https://你的项目.supabase.co</span><br><span class="line">VITE_SUPABASE_ANON_KEY=你的anon_key</span><br></pre></td></tr></table></figure>
+
+<h2 id="第三步：Supabase-后端配置"><a href="#第三步：Supabase-后端配置" class="headerlink" title="第三步：Supabase 后端配置"></a>第三步：Supabase 后端配置</h2><h3 id="创建-articles-表"><a href="#创建-articles-表" class="headerlink" title="创建 articles 表"></a>创建 articles 表</h3><p>在 Supabase Dashboard 的 SQL Editor 里执行：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create table</span> if <span class="keyword">not</span> <span class="keyword">exists</span> public.articles (</span><br><span class="line">  id uuid <span class="keyword">primary key</span> <span class="keyword">default</span> gen_random_uuid(),</span><br><span class="line">  title text <span class="keyword">not null</span>,</span><br><span class="line">  excerpt text,</span><br><span class="line">  content text,</span><br><span class="line">  category_slug text,</span><br><span class="line">  tags text[] <span class="keyword">default</span> <span class="string">&#x27;&#123;&#125;&#x27;</span>,</span><br><span class="line">  author_id uuid,</span><br><span class="line">  is_published <span class="type">boolean</span> <span class="keyword">default</span> <span class="literal">false</span>,</span><br><span class="line">  is_featured <span class="type">boolean</span> <span class="keyword">default</span> <span class="literal">false</span>,</span><br><span class="line">  view_count <span class="type">integer</span> <span class="keyword">default</span> <span class="number">0</span>,</span><br><span class="line">  like_count <span class="type">integer</span> <span class="keyword">default</span> <span class="number">0</span>,</span><br><span class="line">  published_at timestamptz,</span><br><span class="line">  created_at timestamptz <span class="keyword">default</span> now()</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 启用行级安全</span></span><br><span class="line"><span class="keyword">alter table</span> public.articles enable <span class="type">row</span> level security;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 只允许读取已发布的文章</span></span><br><span class="line"><span class="keyword">create</span> policy &quot;articles_read_published&quot;</span><br><span class="line">  <span class="keyword">on</span> public.articles <span class="keyword">for</span> <span class="keyword">select</span></span><br><span class="line">  <span class="keyword">using</span> (is_published <span class="operator">=</span> <span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取-API-Key"><a href="#获取-API-Key" class="headerlink" title="获取 API Key"></a>获取 API Key</h3><p>在 Supabase Dashboard → Settings → API 里拿到：</p>
+<ul>
+<li><strong>Project URL</strong>：<code>https://xxx.supabase.co</code></li>
+<li><strong>anon key</strong>：前端用（受 RLS 保护）</li>
+<li><strong>API key（sb_secret_）</strong>：脚本发布用（绕过 RLS）</li>
+</ul>
+<h2 id="第四步：博客发布系统"><a href="#第四步：博客发布系统" class="headerlink" title="第四步：博客发布系统"></a>第四步：博客发布系统</h2><h3 id="发布脚本"><a href="#发布脚本" class="headerlink" title="发布脚本"></a>发布脚本</h3><p>在项目根目录创建 <code>scripts/publish-blog.mjs</code>，核心逻辑：</p>
+<ol>
+<li>读取 <code>posts/</code> 下的 Markdown 文件</li>
+<li>解析 frontmatter（标题、分类、标签）</li>
+<li>通过 Supabase REST API 写入 articles 表</li>
+<li>同标题文章自动更新</li>
+</ol>
+<h3 id="写文章格式"><a href="#写文章格式" class="headerlink" title="写文章格式"></a>写文章格式</h3><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 文章标题</span><br><span class="line">category: client</span><br><span class="line">platform: android</span><br><span class="line">tags: [&quot;标签1&quot;, &quot;标签2&quot;]</span><br><span class="line"><span class="section">readTime: 10分钟</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="section">## 正文从二级标题开始</span></span><br><span class="line"></span><br><span class="line">正文内容...</span><br></pre></td></tr></table></figure>
+
+<h3 id="发布命令"><a href="#发布命令" class="headerlink" title="发布命令"></a>发布命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 发布</span></span><br><span class="line">node scripts/publish-blog.mjs posts/文章.md</span><br><span class="line"></span><br><span class="line"><span class="comment"># 存草稿</span></span><br><span class="line">node scripts/publish-blog.mjs posts/文章.md --draft</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有文章</span></span><br><span class="line">node scripts/publish-blog.mjs --list</span><br></pre></td></tr></table></figure>
+
+<p>发布后网站实时显示，不用重新构建。</p>
+<h2 id="第五步：Nginx-配置"><a href="#第五步：Nginx-配置" class="headerlink" title="第五步：Nginx 配置"></a>第五步：Nginx 配置</h2><h3 id="安装-Nginx"><a href="#安装-Nginx" class="headerlink" title="安装 Nginx"></a>安装 Nginx</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install -y nginx</span><br></pre></td></tr></table></figure>
+
+<h3 id="站点配置"><a href="#站点配置" class="headerlink" title="站点配置"></a>站点配置</h3><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /etc/nginx/sites-enabled/my-blog.conf</span></span><br><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">    <span class="attribute">server_name</span> 你的域名或IP;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">root</span> /var/www/my-blog/dist;</span><br><span class="line">    <span class="attribute">index</span> index.html;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 静态文件压缩</span></span><br><span class="line">    <span class="attribute">gzip_static</span> <span class="literal">on</span>;</span><br><span class="line">    <span class="attribute">gzip</span> <span class="literal">on</span>;</span><br><span class="line">    <span class="attribute">gzip_types</span> text/plain text/css application/javascript application/json;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 上传大小限制</span></span><br><span class="line">    <span class="attribute">client_max_body_size</span> <span class="number">20m</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># API 反向代理（如果需要后端服务）</span></span><br><span class="line">    <span class="section">location</span> /api &#123;</span><br><span class="line">        <span class="attribute">proxy_pass</span> http://127.0.0.1:8787;</span><br><span class="line">        <span class="attribute">proxy_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Forwarded-For <span class="variable">$proxy_add_x_forwarded_for</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># SPA 路由兜底（关键）</span></span><br><span class="line">    <span class="section">location</span> / &#123;</span><br><span class="line">        <span class="attribute">try_files</span> <span class="variable">$uri</span> <span class="variable">$uri</span>/ /index.html;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>try_files $uri $uri/ /index.html</code> 这行是重点——Vue Router 的 history 模式要求所有路由都回到 index.html，没有这行刷新子路由会 404。</p>
+<h3 id="启用站点"><a href="#启用站点" class="headerlink" title="启用站点"></a>启用站点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">ln</span> -s /etc/nginx/sites-available/my-blog.conf /etc/nginx/sites-enabled/</span><br><span class="line"><span class="built_in">sudo</span> nginx -t          <span class="comment"># 测试配置</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl reload nginx</span><br></pre></td></tr></table></figure>
+
+<h2 id="第六步：部署前端"><a href="#第六步：部署前端" class="headerlink" title="第六步：部署前端"></a>第六步：部署前端</h2><h3 id="本地构建"><a href="#本地构建" class="headerlink" title="本地构建"></a>本地构建</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/my-blog</span><br><span class="line">npm run build</span><br><span class="line"><span class="comment"># 生成 dist/ 目录</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="上传到服务器"><a href="#上传到服务器" class="headerlink" title="上传到服务器"></a>上传到服务器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 打包上传</span></span><br><span class="line">scp -r dist/* my-server:/tmp/blog-dist/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 服务器上替换</span></span><br><span class="line">ssh my-server &lt;&lt; <span class="string">&#x27;EOF&#x27;</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rm</span> -rf /var/www/my-blog/dist.bak</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mv</span> /var/www/my-blog/dist /var/www/my-blog/dist.bak</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /var/www/my-blog/dist</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">cp</span> -r /tmp/blog-dist/* /var/www/my-blog/dist/</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> -R www-data:www-data /var/www/my-blog/dist</span><br><span class="line"><span class="built_in">sudo</span> systemctl reload nginx</span><br><span class="line"><span class="built_in">rm</span> -rf /tmp/blog-dist</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+<h3 id="部署脚本（一键发布）"><a href="#部署脚本（一键发布）" class="headerlink" title="部署脚本（一键发布）"></a>部署脚本（一键发布）</h3><p>写个脚本把构建+上传+替换一键搞定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># deploy.sh</span></span><br><span class="line"><span class="built_in">cd</span> ~/my-blog</span><br><span class="line">npm run build</span><br><span class="line">scp -r dist/* my-server:/tmp/blog-dist/</span><br><span class="line">ssh my-server <span class="string">&quot;sudo rm -rf /var/www/my-blog/dist.bak &amp;&amp; \</span></span><br><span class="line"><span class="string">  sudo mv /var/www/my-blog/dist /var/www/my-blog/dist.bak &amp;&amp; \</span></span><br><span class="line"><span class="string">  sudo mkdir -p /var/www/my-blog/dist &amp;&amp; \</span></span><br><span class="line"><span class="string">  sudo cp -r /tmp/blog-dist/* /var/www/my-blog/dist/ &amp;&amp; \</span></span><br><span class="line"><span class="string">  sudo chown -R www-data:www-data /var/www/my-blog/dist &amp;&amp; \</span></span><br><span class="line"><span class="string">  sudo systemctl reload nginx &amp;&amp; \</span></span><br><span class="line"><span class="string">  rm -rf /tmp/blog-dist&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;✅ 部署完成&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>之后改完代码跑一下 <code>./deploy.sh</code> 就行。</p>
+<h2 id="第七步：Node-js-后端服务（可选）"><a href="#第七步：Node-js-后端服务（可选）" class="headerlink" title="第七步：Node.js 后端服务（可选）"></a>第七步：Node.js 后端服务（可选）</h2><p>如果需要 AI 代理或其他后端接口，用 systemd 管理一个 Node.js 进程：</p>
+<h3 id="服务文件"><a href="#服务文件" class="headerlink" title="服务文件"></a>服务文件</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /etc/systemd/system/blog-server.service</span></span><br><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=Blog API Server</span><br><span class="line"><span class="attr">After</span>=network.target</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">Type</span>=simple</span><br><span class="line"><span class="attr">User</span>=ubuntu</span><br><span class="line"><span class="attr">WorkingDirectory</span>=/opt/blog-server</span><br><span class="line"><span class="attr">ExecStart</span>=/usr/bin/node /opt/blog-server/index.js</span><br><span class="line"><span class="attr">Restart</span>=always</span><br><span class="line"><span class="attr">RestartSec</span>=<span class="number">10</span></span><br><span class="line"><span class="attr">EnvironmentFile</span>=/etc/blog-server.env</span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span>=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<h3 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /etc/blog-server.env</span></span><br><span class="line">AI_API_KEY=你的API密钥</span><br><span class="line">AI_BASE_URL=https://open.bigmodel.cn/api/paas/v4</span><br><span class="line">PORT=8787</span><br></pre></td></tr></table></figure>
+
+<h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> blog-server</span><br><span class="line"><span class="built_in">sudo</span> systemctl start blog-server</span><br><span class="line"><span class="built_in">sudo</span> systemctl status blog-server</span><br></pre></td></tr></table></figure>
+
+<p>开机自动启动，挂了自动重启。</p>
+<h2 id="第八步：域名与-HTTPS（可选）"><a href="#第八步：域名与-HTTPS（可选）" class="headerlink" title="第八步：域名与 HTTPS（可选）"></a>第八步：域名与 HTTPS（可选）</h2><h3 id="配置域名-DNS"><a href="#配置域名-DNS" class="headerlink" title="配置域名 DNS"></a>配置域名 DNS</h3><p>在域名服务商那里加 A 记录，指向服务器 IP。</p>
+<h3 id="申请-HTTPS-证书"><a href="#申请-HTTPS-证书" class="headerlink" title="申请 HTTPS 证书"></a>申请 HTTPS 证书</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install -y certbot python3-certbot-nginx</span><br><span class="line"><span class="built_in">sudo</span> certbot --nginx -d 你的域名.com</span><br></pre></td></tr></table></figure>
+
+<p>Certbot 会自动修改 Nginx 配置、申请证书、设置自动续期。一步到位。</p>
+<h2 id="整体架构图"><a href="#整体架构图" class="headerlink" title="整体架构图"></a>整体架构图</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">用户浏览器</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">  Nginx (80/443)</span><br><span class="line">    ├── 静态文件 → /var/www/my-blog/dist/</span><br><span class="line">    └── /api/* → 反代到 127.0.0.1:8787 (Node.js)</span><br><span class="line">                    │</span><br><span class="line">                    ▼</span><br><span class="line">                AI API（智谱 GLM）</span><br><span class="line"></span><br><span class="line">前端 Vue3</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">  Supabase（云端）</span><br><span class="line">    └── articles 表（博客文章）</span><br></pre></td></tr></table></figure>
+
+<h2 id="成本估算"><a href="#成本估算" class="headerlink" title="成本估算"></a>成本估算</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>费用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>云服务器 2C2G</td>
+<td>约 50-100 元&#x2F;月</td>
+</tr>
+<tr>
+<td>域名</td>
+<td>约 50-80 元&#x2F;年</td>
+</tr>
+<tr>
+<td>Supabase</td>
+<td>免费额度（500MB 数据库 + 50K 请求&#x2F;月）</td>
+</tr>
+<tr>
+<td>AI API</td>
+<td>智谱 GLM 有免费额度</td>
+</tr>
+<tr>
+<td>Nginx &#x2F; Node.js</td>
+<td>开源免费</td>
+</tr>
+<tr>
+<td><strong>总计</strong></td>
+<td><strong>约 60-110 元&#x2F;月</strong></td>
+</tr>
+</tbody></table>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="刷新页面-404"><a href="#刷新页面-404" class="headerlink" title="刷新页面 404"></a>刷新页面 404</h3><p>Nginx 缺少 <code>try_files $uri $uri/ /index.html</code>。Vue Router history 模式必须配这行。</p>
+<h3 id="文章发布了网站看不到"><a href="#文章发布了网站看不到" class="headerlink" title="文章发布了网站看不到"></a>文章发布了网站看不到</h3><p>检查 articles 表的 <code>is_published</code> 是不是 <code>true</code>。RLS 策略只允许读已发布的。</p>
+<h3 id="Nginx-502"><a href="#Nginx-502" class="headerlink" title="Nginx 502"></a>Nginx 502</h3><p>后端 Node.js 服务挂了。<code>sudo systemctl status blog-server</code> 查状态，看日志 <code>sudo journalctl -u blog-server -n 50</code>。</p>
+<h3 id="SSH-连不上"><a href="#SSH-连不上" class="headerlink" title="SSH 连不上"></a>SSH 连不上</h3><p>检查安全组有没有开 22 端口。如果禁了密码登录又丢了密钥，用云控制台的 VNC 终端进去恢复。</p>
+<h2 id="这套方案适合谁"><a href="#这套方案适合谁" class="headerlink" title="这套方案适合谁"></a>这套方案适合谁</h2><ul>
+<li>想搭个人博客但不想花太多钱的开发者</li>
+<li>前端会 Vue&#x2F;React，后端不想自己维护数据库的</li>
+<li>想要博客发布系统（写 Markdown 跑脚本就发布）的</li>
+<li>预算每月 100 元以内的</li>
+</ul>
+<p>整个搭建过程大概一个周末能搞定。最花时间的不是写代码，是配 Nginx 和调通 Supabase 的 RLS 策略。</p>
+
+  </div>
+
+  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+  <section class="follow-card">
+    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+    <div class="follow-grid">
+      <div class="follow-block">
+        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+        <div class="follow-text">
+          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+        </div>
+      </div>
+      <div class="follow-block">
+        <div class="follow-text">
+          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+  </section>
+
+  <nav class="post-nav">
+    <a class="post-nav__prev" href="/2026/07/28/aosp-source-and-build/">← Android 16 源码获取与 SystemUI 编译全流程</a>
+    <a class="post-nav__next" href="/2026/07/28/flutter-full-stack-guide/">一套 Flutter 代码发布到全平台：从拍照 App 到多端发布的完整实战 →</a>
+  </nav>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 豆奶与程序猫 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 · 托管于 GitHub Pages</p>
+      <p class="footer-social">
+        <a href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">📕 小红书：豆奶与程序猫</a>
+        <span>·</span>
+        <a href="https://github.com/soycodetrail" target="_blank" rel="noopener">💻 GitHub</a>
+        <span>·</span>
+        <a href="/atom.xml" target="_blank" rel="noopener">📰 RSS</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>在 Apple Silicon Mac 上编译 AOSP SystemUI：59 分钟从零到 APK | 豆奶与程序猫的技术博客</title>
+  <meta name="description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta name="author" content="豆奶与程序猫">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="在 Apple Silicon Mac 上编译 AOSP SystemUI：59 分钟从零到 APK">
+  <meta property="og:description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta property="og:url" content="https://soycodetrail.github.io/2026/07/28/aosp-build-systemui/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
+  <link rel="sitemap" href="/sitemap.xml" type="application/xml">
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
+      <nav class="site-nav">
+        <a href="/">首页</a>
+        <a href="/archives">归档</a>
+        <a href="/tags">标签</a>
+        <a href="/about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container site-main">
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">在 Apple Silicon Mac 上编译 AOSP SystemUI：59 分钟从零到 APK</h1>
+    <div class="post-meta">
+      <span>📅 2026-07-28</span>
+      
+      <span>⏱️ 15分钟</span>
+      
+    </div>
+    <div class="post-tags">
+      
+        <a class="tag" href="/tags/AOSP/">#AOSP</a>
+      
+        <a class="tag" href="/tags/%E7%BC%96%E8%AF%91/">#编译</a>
+      
+        <a class="tag" href="/tags/SystemUI/">#SystemUI</a>
+      
+        <a class="tag" href="/tags/Docker/">#Docker</a>
+      
+    </div>
+  </header>
+
+  <div class="post-content">
+    <p>手上是台 Apple M3 Max，想把 AOSP 的 SystemUI 单独编译出来跑一跑。折腾了三天，踩了一堆坑，最后 59 分钟跑完，产物是个 166MB 的 SystemUI.apk。把整个过程记下来，免得下次再栽同一个坑。</p>
+<h2 id="为什么-Apple-Silicon-不能直接编译-AOSP"><a href="#为什么-Apple-Silicon-不能直接编译-AOSP" class="headerlink" title="为什么 Apple Silicon 不能直接编译 AOSP"></a>为什么 Apple Silicon 不能直接编译 AOSP</h2><p>先说结论：<strong>Mac 上（不管 Intel 还是 Apple Silicon）永远没法原生编译 AOSP</strong>。</p>
+<p>AOSP 的 build 系统（Soong + Ninja）依赖一套 <code>linux-arm64</code> &#x2F; <code>linux-x86_64</code> 的交叉编译工具链，这套东西只在 Linux 上跑。macOS 上没有，Google 也从没打算支持。官方文档里那句 “macOS 需要额外装 Xcode + case-sensitive 磁盘” 是给老版本留的过时说明，Android 14 之后基本就别想了。</p>
+<p>Apple Silicon 还多一层麻烦：就算勉强在 Linux 上跑，原生 arm64 容器里 AOSP 的很多 prebuilt 工具链（特别是 <code>prebuilts/clang</code>、<code>prebuilts/build-tools</code>）只放了 x86_64 的二进制，arm64 的根本没编出来。直接跑就是 <code>exec format error</code>。</p>
+<p>解决办法是<strong>反直觉的那一个</strong>：在 Apple Silicon 上跑一个 <strong>x86_64 的 Linux 容器</strong>，靠 Rosetta 2 把 x86 指令翻译成 arm64。Rosetta 的性能损耗大概 20%-30%，能接受；换来的是工具链完整可用。</p>
+<p>选 arm64 原生容器看起来”更对”，实际上跑两步就崩，劝你别试。</p>
+<h2 id="Docker-环境搭建"><a href="#Docker-环境搭建" class="headerlink" title="Docker 环境搭建"></a>Docker 环境搭建</h2><h3 id="Dockerfile"><a href="#Dockerfile" class="headerlink" title="Dockerfile"></a>Dockerfile</h3><p>镜像基于 <code>ubuntu:22.04</code>，apt 源换成清华，装齐 AOSP 的编译依赖：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> ubuntu:<span class="number">22.04</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 清华 apt 源，国内拉包快 10 倍</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> sed -i <span class="string">&#x27;s@//.*archive.ubuntu.com@//mirrors.tuna.tsinghua.edu.cn@g&#x27;</span> /etc/apt/sources.list &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    sed -i <span class="string">&#x27;s/security.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g&#x27;</span> /etc/apt/sources.list</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apt-get update &amp;&amp; apt-get install -y --no-install-recommends \</span></span><br><span class="line"><span class="language-bash">    git gnupg flex bison gperf build-essential zip curl zlib1g-dev \</span></span><br><span class="line"><span class="language-bash">    libc6-dev-i386 lib32ncurses-dev libx11-dev lib32z-dev ccache \</span></span><br><span class="line"><span class="language-bash">    libgl1-mesa-dev libxml2-utils xsltproc unzip python3 \</span></span><br><span class="line"><span class="language-bash">    libssl-dev libncurses5 wget <span class="built_in">sudo</span> vim less file &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">rm</span> -rf /var/lib/apt/lists/*</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 装个低版本 JDK（AOSP 16 仍要用）</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apt-get update &amp;&amp; apt-get install -y openjdk-17-jdk &amp;&amp; <span class="built_in">rm</span> -rf /var/lib/apt/lists/*</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> /aosp</span></span><br></pre></td></tr></table></figure>
+
+<p>构建（注意 <code>--platform linux/amd64</code>，强制走 x86）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build --platform linux/amd64 -t aosp-build:22.04 .</span><br></pre></td></tr></table></figure>
+
+<h3 id="为什么硬要-x86-镜像"><a href="#为什么硬要-x86-镜像" class="headerlink" title="为什么硬要 x86 镜像"></a>为什么硬要 x86 镜像</h3><p>构建时加 <code>--platform linux/amd64</code> 是关键。前面说过：arm64 容器里 AOSP 的 prebuilt 工具链二进制是缺的，跑 soong 就会报 <code>clang: command not found</code> 或者干脆 <code>Exec format error</code>。</p>
+<p>x86 镜像跑在 Rosetta 上虽然慢一点，但<strong>能用</strong>。编译这种一次性的事，能用比快重要。</p>
+<h3 id="最大的坑：Docker-VM-默认内存-7-6G，必崩"><a href="#最大的坑：Docker-VM-默认内存-7-6G，必崩" class="headerlink" title="最大的坑：Docker VM 默认内存 7.6G，必崩"></a>最大的坑：Docker VM 默认内存 7.6G，必崩</h3><p>Docker Desktop for Mac 底层是个 Linux VM，默认给 <strong>7.6GB</strong> 内存。AOSP 编译到 soong 阶段，几个 java 进程 + ninja 并行，7.6G 直接 OOM，报错信息五花八门（最常见的是 <code>java.lang.OutOfMemoryError</code> 或者 ninja 被信号 9 杀掉，看着像代码问题其实是 VM 内存爆了）。</p>
+<p>这个坑踩了小半天，反复怀疑是源码版本、是依赖没装全。其实是 Docker 的锅。</p>
+<p>解决办法是改 Docker Desktop 的 VM 配置。新版 Docker Desktop（4.30+）的 GUI 里没内存滑块了，要改 <code>settings-store.json</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 关掉 Docker Desktop 再改</span></span><br><span class="line">osascript -e <span class="string">&#x27;quit app &quot;Docker&quot;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 编辑配置文件</span></span><br><span class="line">vi ~/Library/Group\ Containers/group.com.docker/settings-store.json</span><br></pre></td></tr></table></figure>
+
+<p>把这两个字段改掉：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;memoryMiB&quot;</span><span class="punctuation">:</span> <span class="number">32768</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;swapMiB&quot;</span><span class="punctuation">:</span> <span class="number">16384</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;useVirtualizationFrameworkRosetta&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>memoryMiB: 32768</code> —— 给 32GB。M3 Max 物理内存够的话尽量多给，全量编译建议 64GB。</li>
+<li><code>swapMiB: 16384</code> —— 加点 swap 兜底。</li>
+<li><code>useVirtualizationFrameworkRosetta: true</code> —— 启用 Rosetta 加速 x86 容器，不开的话编译时间直接翻三倍。</li>
+</ul>
+<p>改完启动 Docker，进去确认：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker run --<span class="built_in">rm</span> --platform linux/amd64 aosp-build:22.04 free -h</span><br><span class="line"><span class="comment">#               total        used        free</span></span><br><span class="line"><span class="comment"># Mem:           31Gi       512Mi        30Gi</span></span><br></pre></td></tr></table></figure>
+
+<p>看到 31Gi 就对了。</p>
+<h2 id="编译前的准备"><a href="#编译前的准备" class="headerlink" title="编译前的准备"></a>编译前的准备</h2><h3 id="启动容器挂载源码"><a href="#启动容器挂载源码" class="headerlink" title="启动容器挂载源码"></a>启动容器挂载源码</h3><p>源码已经 sync 在宿主机 <code>~/aosp-r4</code>（约 196GB），用 volume 挂进容器，不拷贝：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --platform linux/amd64 \</span><br><span class="line">    -v ~/aosp-r4:/aosp \</span><br><span class="line">    --name aosp-build \</span><br><span class="line">    aosp-build:22.04 bash</span><br></pre></td></tr></table></figure>
+
+<p>进容器后确认源码在：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /aosp</span><br><span class="line"><span class="built_in">ls</span> -la build/envsetup.sh   <span class="comment"># 必须存在</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="source-envsetup"><a href="#source-envsetup" class="headerlink" title="source envsetup"></a>source envsetup</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> build/envsetup.sh</span><br></pre></td></tr></table></figure>
+
+<p>这一步会加载一堆 shell 函数（<code>lunch</code>、<code>m</code>、<code>mm</code>、<code>tapas</code> 等），没报错就过。看到末尾的 <code>including vendor/google/...</code> 之类的输出正常。</p>
+<h3 id="选-lunch-目标"><a href="#选-lunch-目标" class="headerlink" title="选 lunch 目标"></a>选 lunch 目标</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lunch sdk_gphone64_x86_64-trunk_staging-userdebug</span><br></pre></td></tr></table></figure>
+
+<p>这个串拆开看：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sdk_gphone64_x86_64</code></td>
+<td>目标设备：64 位 x86 模拟器（SDK gPhone）</td>
+</tr>
+<tr>
+<td><code>trunk_staging</code></td>
+<td>分支标签：trunk staging 分支，比 main 稳定</td>
+</tr>
+<tr>
+<td><code>userdebug</code></td>
+<td>编译类型：带 root + 可调试，开发用</td>
+</tr>
+</tbody></table>
+<p>为什么选这个：</p>
+<ul>
+<li>物理机用 <code>aosp_</code> 开头的目标（比如 <code>aosp_cf_x86_64_phone</code>），模拟器用 <code>sdk_gphone64_</code> 开头。</li>
+<li>想跑在 emulator 上就得选 sdk_gphone64 这一支。</li>
+<li><code>userdebug</code> 别选 <code>user</code>，<code>user</code> 版本没 root 没 adb root，调试 hell。</li>
+</ul>
+<p>执行完会打印一长串环境变量，类似：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">============================================</span><br><span class="line">PLATFORM_VERSION_CODENAME= Baklava</span><br><span class="line">PLATFORM_VERSION= 16</span><br><span class="line">TARGET_PRODUCT= sdk_gphone64_x86_64</span><br><span class="line">TARGET_BUILD_VARIANT= userdebug</span><br><span class="line">TARGET_ARCH= x86_64</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>看到 <code>PLATFORM_VERSION= 16</code> 就对了。</p>
+<h2 id="编译-SystemUI"><a href="#编译-SystemUI" class="headerlink" title="编译 SystemUI"></a>编译 SystemUI</h2><h3 id="单编命令"><a href="#单编命令" class="headerlink" title="单编命令"></a>单编命令</h3><p>AOSP 支持单独编某个模块，SystemUI 的模块名就是 <code>SystemUI</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m SystemUI</span><br></pre></td></tr></table></figure>
+
+<p>不要傻乎乎去 <code>cd frameworks/base/packages/SystemUI &amp;&amp; mm</code>，新版 build 系统里 <code>mm</code> 行为变了，直接用顶层 <code>m &lt;模块名&gt;</code> 最稳。</p>
+<p><code>m</code> 比 <code>make</code> 智能在它会自动用上所有 CPU 核，并且缓存 ninja 的依赖图。第一次编译会从零跑，后面增量编只动一个文件的话 30 秒搞定。</p>
+<h3 id="编译过程"><a href="#编译过程" class="headerlink" title="编译过程"></a>编译过程</h3><p>跑了 <strong>59 分钟，零错误</strong>。中间日志大致节奏：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[  0% 1/12345] Initializing ...</span><br><span class="line">[  5% 620/12345] out/soong/.intermediates/...</span><br><span class="line">[ 50% 6172/12345] //frameworks/base/packages/SystemUI:SystemUI ...</span><br><span class="line">[ 99% 12200/12345] Linking SystemUI.apk</span><br><span class="line">[100% 12345/12345] Install: out/target/product/.../system/packages/SystemUI.apk</span><br></pre></td></tr></table></figure>
+
+<p>机器配置 M3 Max（14 核）&#x2F; 32GB 给 Docker &#x2F; 源码在 NVMe SSD 上。如果你的机器弱一点，时间按核数线性放大。</p>
+<h3 id="产物位置和大小"><a href="#产物位置和大小" class="headerlink" title="产物位置和大小"></a>产物位置和大小</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">find out/target/product -name <span class="string">&quot;SystemUI.apk&quot;</span></span><br><span class="line"><span class="comment"># out/target/product/emulator_x86_64/system/packages/SystemUI.apk</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">ls</span> -lh out/target/product/emulator_x86_64/system/packages/SystemUI.apk</span><br><span class="line"><span class="comment"># -rw-r--r-- 1 root root 166M SystemUI.apk</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>166MB</strong>，比一般 app 大得多。SystemUI 里塞了状态栏、通知中心、锁屏、截图、权限弹窗、recent、音量面板……几十个子模块全打进一个 apk，大是正常的。</p>
+<h2 id="编译踩坑实录"><a href="#编译踩坑实录" class="headerlink" title="编译踩坑实录"></a>编译踩坑实录</h2><p>光跑通 <code>m SystemUI</code> 是不够的，前面到能编译这一步，至少栽了三个大坑。</p>
+<h3 id="坑一：gblsigntool-模块缺失"><a href="#坑一：gblsigntool-模块缺失" class="headerlink" title="坑一：gblsigntool 模块缺失"></a>坑一：gblsigntool 模块缺失</h3><p>报错大概长这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ninja: error: &#x27;out/soong/.intermediates/.../gblsigntool/gblsigntool&#x27;, needed by &#x27;...&#x27;, missing and no known rule to make it</span><br></pre></td></tr></table></figure>
+
+<p><code>gblsigntool</code> 是 GKI（Generic Kernel Image）签名用的工具，在 <code>trunk_staging</code> 这个分支上源码没同步全，但某个 <code>Android.bp</code> 里又引用了它。</p>
+<p>定位是哪个 bp 引的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">grep -rn <span class="string">&quot;gblsigntool&quot;</span> --include=<span class="string">&quot;Android.bp&quot;</span> .</span><br><span class="line"><span class="comment"># bootable/depreverifier/Android.bp:25:    srcs: [&quot;gblsigntool_test&quot;],</span></span><br></pre></td></tr></table></figure>
+
+<p>根因是 <code>trunk_staging</code> 的部分模块依赖了 main 分支才有的工具，r4 这个 tag 没跟上。</p>
+<p>解决方案：直接把引用它的那个测试模块从 bp 里注释掉。编辑 <code>bootable/depreverifier/Android.bp</code>，把依赖 <code>gblsigntool</code> 的 <code>cc_test</code> 块整段删掉。编 SystemUI 用不到这个测试。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 删掉这种块</span><br><span class="line">// cc_test &#123;</span><br><span class="line">//     name: <span class="string">&quot;gblsigntool_test&quot;</span>,</span><br><span class="line">//     srcs: [<span class="string">&quot;gblsigntool_test.cpp&quot;</span>],</span><br><span class="line">//     ...</span><br><span class="line">// &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是”用不到就删”的策略，单编 SystemUI 不会被这个测试模块卡住，全量编译时才需要更仔细处理。</p>
+<h3 id="坑二：VNDK-v30-缺失"><a href="#坑二：VNDK-v30-缺失" class="headerlink" title="坑二：VNDK v30 缺失"></a>坑二：VNDK v30 缺失</h3><p>报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">error: VNDK version: 30 not found in out/target/product/.../system/system_ext/vndk-30-dm: ...</span><br></pre></td></tr></table></figure>
+
+<p>VNDK（Vendor NDK）是给 vendor 分区用的稳定 ABI。AOSP 16 默认带的 VNDK 起步是 v33，但 GSI（Generic System Image）打包脚本里又要求校验 v30，对不上。</p>
+<p>定位文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">grep -rn <span class="string">&quot;vndk-v30\|vndk_version: 30&quot;</span> --include=<span class="string">&quot;*.mk&quot;</span> .</span><br><span class="line"><span class="comment"># target/product/gsi_release.mk:42:BOARD_VNDK_VERSION := 30</span></span><br></pre></td></tr></table></figure>
+
+<p>编辑 <code>target/product/gsi_release.mk</code>，把对 v30 的要求去掉。要么删掉这一行，要么改成当前分支实际有的版本：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 原</span></span><br><span class="line">BOARD_VNDK_VERSION := 30</span><br><span class="line"></span><br><span class="line"><span class="comment"># 改成（或者直接注释掉）</span></span><br><span class="line"><span class="comment"># BOARD_VNDK_VERSION := 30</span></span><br></pre></td></tr></table></figure>
+
+<p>单编 SystemUI 跟 GSI 打包没关系，去掉这个校验不影响目标产物。</p>
+<h3 id="坑三：Docker-VM-内存不足（前面讲过）"><a href="#坑三：Docker-VM-内存不足（前面讲过）" class="headerlink" title="坑三：Docker VM 内存不足（前面讲过）"></a>坑三：Docker VM 内存不足（前面讲过）</h3><p><code>m SystemUI</code> 跑到中段直接挂，日志里是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ninja: build stopped: subcommand failed.</span><br><span class="line">java.lang.OutOfMemoryError: GC overhead limit exceeded</span><br></pre></td></tr></table></figure>
+
+<p>以为是 gradle&#x2F;soong 的 heap 调小了，调了半天 <code>-Xmx</code> 没用。最后才发现是 Docker VM 默认 7.6GB，VM 自己先 OOM 了，进程是被系统 kill 的，不是 java 自己 OOM。</p>
+<p>根因和解决办法见前面”Docker 环境搭建”那一节，把 <code>memoryMiB</code> 改到 32768 之后没再出现过。</p>
+<p>判断是不是这个坑：在容器里开一个 <code>htop</code>，编译时盯一眼，如果内存条顶到 7.5G 然后进程消失，就是这个。</p>
+<h3 id="坑四：全量编译-m-droid-的-fd-耗尽"><a href="#坑四：全量编译-m-droid-的-fd-耗尽" class="headerlink" title="坑四：全量编译 m droid 的 fd 耗尽"></a>坑四：全量编译 <code>m droid</code> 的 fd 耗尽</h3><p>单编 SystemUI 没事，但当时也想试一把全量编译 <code>m droid</code>，结果跑到 70% 报：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ninja: fatal: posix_spawn: Resource temporarily unavailable</span><br></pre></td></tr></table></figure>
+
+<p>或者：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash: can&#x27;t open file: too many open files</span><br></pre></td></tr></table></figure>
+
+<p>这是 fd（文件描述符）耗尽。macOS 宿主机默认的 <code>kern.maxfiles</code> 是 256，docker VM 里继承下来根本不够 AOSP 全量编译（一次几万个文件同时开）。</p>
+<p>在宿主机改：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 临时生效</span></span><br><span class="line"><span class="built_in">sudo</span> sysctl -w kern.maxfiles=1048576</span><br><span class="line"><span class="built_in">sudo</span> sysctl -w kern.maxfilesperproc=1048576</span><br><span class="line"></span><br><span class="line"><span class="comment"># 永久生效</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;kern.maxfiles=1048576&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/sysctl.conf</span><br></pre></td></tr></table></figure>
+
+<p>容器里也加一行 ulimit，启动时带上：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --platform linux/amd64 \</span><br><span class="line">    --<span class="built_in">ulimit</span> nofile=1048576:1048576 \</span><br><span class="line">    -v ~/aosp-r4:/aosp \</span><br><span class="line">    aosp-build:22.04 bash</span><br></pre></td></tr></table></figure>
+
+<p>进容器验证：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ulimit</span> -n</span><br><span class="line"><span class="comment"># 1048576</span></span><br></pre></td></tr></table></figure>
+
+<p>单编 SystemUI 触发不到这个上限，但全量编 <code>m droid</code> 必踩。</p>
+<h2 id="编译成功后的验证"><a href="#编译成功后的验证" class="headerlink" title="编译成功后的验证"></a>编译成功后的验证</h2><h3 id="APK-在哪"><a href="#APK-在哪" class="headerlink" title="APK 在哪"></a>APK 在哪</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> -lh out/target/product/emulator_x86_64/system/packages/SystemUI.apk</span><br><span class="line"><span class="comment"># 166M</span></span><br></pre></td></tr></table></figure>
+
+<p>路径里的 <code>emulator_x86_64</code> 跟 lunch 选的目标对应，选别的目标目录名会不一样。</p>
+<h3 id="验证版本号"><a href="#验证版本号" class="headerlink" title="验证版本号"></a>验证版本号</h3><p>把 apk 拷出容器，用 aapt2 或者直接 unzip 看 manifest：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 拷出来</span></span><br><span class="line">docker <span class="built_in">cp</span> aosp-build:/aosp/out/target/product/emulator_x86_64/system/packages/SystemUI.apk .</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用 aapt 看 versionName / versionCode</span></span><br><span class="line">aapt dump badging SystemUI.apk | <span class="built_in">head</span> -5</span><br><span class="line"><span class="comment"># package: name=&#x27;com.android.systemui&#x27; versionCode=&#x27;36&#x27; versionName=&#x27;16&#x27; ...</span></span><br></pre></td></tr></table></figure>
+
+<p><code>versionName=16</code> 对应 PLATFORM_VERSION&#x3D;16，<code>versionCode=36</code> 是内部 build 号。对得上 lunch 时打印的环境变量就说明编的是对的版本。</p>
+<p>或者 unzip 看一眼也行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unzip -p SystemUI.apk AndroidManifest.xml | strings | grep -i version</span><br></pre></td></tr></table></figure>
+
+<h3 id="能不能装到模拟器"><a href="#能不能装到模拟器" class="headerlink" title="能不能装到模拟器"></a>能不能装到模拟器</h3><p>这是最后一个小坑。</p>
+<p>手头的模拟器是 Android Studio 里下的 release 版 Baklava（API 36 release），编译出来的 SystemUI 是 <code>trunk_staging-userdebug</code> 的，<strong>版本签名和 fingerprint 对不上，直接 <code>adb install -r</code> 会报签名冲突</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: Package com.android.systemui signatures do not match]</span><br></pre></td></tr></table></figure>
+
+<p>SystemUI 是系统应用，本来也不是普通 install 能覆盖的。要换 SystemUI，路径是：</p>
+<ol>
+<li>用 <code>aosp</code> 源码自己 build 一个 emulator 镜像（<code>m sdk_addon</code> 或者直接 <code>emulator</code> 用编出来的 system image）。</li>
+<li>启动模拟器时用 <code>-system</code> 参数指向自己编的 image。</li>
+<li>或者直接把 SystemUI.apk push 到 <code>/system/system_ext/priv-app/SystemUI/</code>，但 userdebug 版本才能 <code>adb root</code> + <code>remount</code>。</li>
+</ol>
+<p>最干脆的办法：用 AOSP 源码自带的 emulator 启动自编镜像：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在容器里或宿主机 AOSP 根目录</span></span><br><span class="line">emulator -avd MyAOSP -system out/target/product/emulator_x86_64/system.img</span><br></pre></td></tr></table></figure>
+
+<p>想替换现有 Baklava 开发版（不是 release）的 SystemUI，开发版是 userdebug，可以：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">adb root</span><br><span class="line">adb remount</span><br><span class="line">adb push SystemUI.apk /system/system_ext/priv-app/SystemUI/SystemUI.apk</span><br><span class="line">adb shell killall com.android.systemui</span><br></pre></td></tr></table></figure>
+
+<p>SystemUI 会自动重启加载新的。release 版做不了这步，签名和 remount 都过不去。</p>
+<h2 id="配置速查表"><a href="#配置速查表" class="headerlink" title="配置速查表"></a>配置速查表</h2><p>整个流程里改过的关键配置一次性列清楚：</p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>文件 &#x2F; 命令</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Docker VM 内存</td>
+<td><code>~/Library/Group Containers/group.com.docker/settings-store.json</code></td>
+<td><code>memoryMiB: 32768</code></td>
+</tr>
+<tr>
+<td>Rosetta 加速</td>
+<td>同上</td>
+<td><code>useVirtualizationFrameworkRosetta: true</code></td>
+</tr>
+<tr>
+<td>macOS fd 上限</td>
+<td><code>sysctl kern.maxfiles</code></td>
+<td><code>1048576</code></td>
+</tr>
+<tr>
+<td>容器 fd 上限</td>
+<td><code>docker run --ulimit</code></td>
+<td><code>nofile=1048576:1048576</code></td>
+</tr>
+<tr>
+<td>gblsigntool 引用</td>
+<td><code>bootable/depreverifier/Android.bp</code></td>
+<td>删测试模块</td>
+</tr>
+<tr>
+<td>VNDK v30 要求</td>
+<td><code>target/product/gsi_release.mk</code></td>
+<td>注释 <code>BOARD_VNDK_VERSION := 30</code></td>
+</tr>
+<tr>
+<td>lunch 目标</td>
+<td>—</td>
+<td><code>sdk_gphone64_x86_64-trunk_staging-userdebug</code></td>
+</tr>
+<tr>
+<td>单编命令</td>
+<td>—</td>
+<td><code>m SystemUI</code></td>
+</tr>
+</tbody></table>
+<h2 id="几条血泪经验"><a href="#几条血泪经验" class="headerlink" title="几条血泪经验"></a>几条血泪经验</h2><ul>
+<li><strong>先给 Docker VM 32GB 内存再开始</strong>。7.6G 默认值这个坑，报错信息会误导你去找代码问题，白白浪费半天。</li>
+<li><strong>必须用 x86 容器 + Rosetta</strong>。arm64 容器看似更对，prebuilt 工具链一跑就崩。</li>
+<li>**单编 SystemUI 用 <code>m SystemUI</code>，别碰 <code>m droid</code>**。全量编译 4 小时起步，还踩 fd 耗尽，单编 59 分钟出活。</li>
+<li><strong>源码挂卷不要拷贝</strong>。196GB 拷贝一份是噩梦，volume 挂进去零成本。</li>
+<li><strong>release 模拟器换不了 SystemUI</strong>。要测自编 SystemUI，老老实实用 AOSP 自编的 system image 起模拟器。</li>
+</ul>
+<p>最终结果：59 分钟编出 166MB 的 SystemUI.apk，versionCode 36，versionName 16，跑在自编的 Baklava userdebug 镜像上，状态栏、通知、锁屏全部正常。这条路走通一次，后面改 SystemUI 源码增量编译只要 30 秒。</p>
+
+  </div>
+
+  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+  <section class="follow-card">
+    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+    <div class="follow-grid">
+      <div class="follow-block">
+        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+        <div class="follow-text">
+          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+        </div>
+      </div>
+      <div class="follow-block">
+        <div class="follow-text">
+          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+  </section>
+
+  <nav class="post-nav">
+    <a class="post-nav__prev" href="/2026/08/02/launcher3-11-custom-view/">← Launcher3 源码精读（11）：自定义视图</a>
+    <a class="post-nav__next" href="/2026/07/28/ai-coding-guide-2026/">2026年，零基础怎么学 AI 和编程 →</a>
+  </nav>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 豆奶与程序猫 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 · 托管于 GitHub Pages</p>
+      <p class="footer-social">
+        <a href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">📕 小红书：豆奶与程序猫</a>
+        <span>·</span>
+        <a href="https://github.com/soycodetrail" target="_blank" rel="noopener">💻 GitHub</a>
+        <span>·</span>
+        <a href="/atom.xml" target="_blank" rel="noopener">📰 RSS</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

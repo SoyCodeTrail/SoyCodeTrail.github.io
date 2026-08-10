@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Android 16 源码获取与 SystemUI 编译全流程 | 豆奶与程序猫的技术博客</title>
+  <meta name="description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta name="author" content="豆奶与程序猫">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Android 16 源码获取与 SystemUI 编译全流程">
+  <meta property="og:description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta property="og:url" content="https://soycodetrail.github.io/2026/07/28/aosp-source-and-build/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
+  <link rel="sitemap" href="/sitemap.xml" type="application/xml">
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
+      <nav class="site-nav">
+        <a href="/">首页</a>
+        <a href="/archives">归档</a>
+        <a href="/tags">标签</a>
+        <a href="/about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container site-main">
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">Android 16 源码获取与 SystemUI 编译全流程</h1>
+    <div class="post-meta">
+      <span>📅 2026-07-28</span>
+      
+      <span>⏱️ 18分钟</span>
+      
+    </div>
+    <div class="post-tags">
+      
+        <a class="tag" href="/tags/AOSP/">#AOSP</a>
+      
+        <a class="tag" href="/tags/%E7%BC%96%E8%AF%91/">#编译</a>
+      
+        <a class="tag" href="/tags/SystemUI/">#SystemUI</a>
+      
+        <a class="tag" href="/tags/Docker/">#Docker</a>
+      
+    </div>
+  </header>
+
+  <div class="post-content">
+    <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在 Apple M3 Max (arm64) 上编译 AOSP SystemUI，目标版本 android-16.0.0_r4，目标设备为模拟器。记录从源码获取到编译成功的完整流程。</p>
+<h2 id="源码获取"><a href="#源码获取" class="headerlink" title="源码获取"></a>源码获取</h2><h3 id="用清华镜像（国内直连，75-MB-s）"><a href="#用清华镜像（国内直连，75-MB-s）" class="headerlink" title="用清华镜像（国内直连，75 MB&#x2F;s）"></a>用清华镜像（国内直连，75 MB&#x2F;s）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> ~/aosp-r4 &amp;&amp; <span class="built_in">cd</span> ~/aosp-r4</span><br><span class="line">repo init -u https://aosp.tuna.tsinghua.edu.cn/platform/manifest -b android-16.0.0_r4</span><br><span class="line">repo <span class="built_in">sync</span> -c -j8</span><br></pre></td></tr></table></figure>
+
+<p>完整源码约 <strong>196GB</strong>，清华镜像比走代理快 10 倍。</p>
+<h3 id="为什么选-r4"><a href="#为什么选-r4" class="headerlink" title="为什么选 r4"></a>为什么选 r4</h3><p>android-16.0.0_r4 是稳定 tag，对应开发版代号 Baklava。不要用 main 分支（不稳定，模块经常缺失）。</p>
+<h2 id="编译环境（Docker-方案）"><a href="#编译环境（Docker-方案）" class="headerlink" title="编译环境（Docker 方案）"></a>编译环境（Docker 方案）</h2><p>Apple Silicon 上不能直接编译 AOSP——需要 Docker + Rosetta 翻译 x86。</p>
+<h3 id="Docker-镜像构建"><a href="#Docker-镜像构建" class="headerlink" title="Docker 镜像构建"></a>Docker 镜像构建</h3><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> ubuntu:<span class="number">22.04</span></span><br><span class="line"><span class="comment"># AOSP 编译依赖 + 清华 apt 镜像</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apt-get update &amp;&amp; apt-get install -y \</span></span><br><span class="line"><span class="language-bash">    git gnupg flex bison build-base zip curl \</span></span><br><span class="line"><span class="language-bash">    libncurses-dev libssl-dev</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="关键配置"><a href="#关键配置" class="headerlink" title="关键配置"></a>关键配置</h3><table>
+<thead>
+<tr>
+<th>项</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Docker 镜像</td>
+<td>x86 + Rosetta（arm64 容器缺工具链）</td>
+</tr>
+<tr>
+<td>Docker VM 内存</td>
+<td><strong>32GB</strong>（默认 7.6GB 必崩）</td>
+</tr>
+<tr>
+<td>文件系统</td>
+<td>ext4（Docker 卷，解决 APFS 大小写不敏感）</td>
+</tr>
+<tr>
+<td>fd 限制</td>
+<td><code>kern.maxfiles=1048576</code></td>
+</tr>
+</tbody></table>
+<h2 id="SystemUI-编译"><a href="#SystemUI-编译" class="headerlink" title="SystemUI 编译"></a>SystemUI 编译</h2><h3 id="编译命令"><a href="#编译命令" class="headerlink" title="编译命令"></a>编译命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进 Docker 容器</span></span><br><span class="line"><span class="built_in">source</span> build/envsetup.sh</span><br><span class="line">lunch sdk_gphone64_x86_64-trunk_staging-userdebug</span><br><span class="line">m SystemUI</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译结果"><a href="#编译结果" class="headerlink" title="编译结果"></a>编译结果</h3><ul>
+<li>耗时：<strong>59 分钟</strong>（零错误）</li>
+<li>产物：<code>SystemUI.apk</code>（166MB）</li>
+<li>版本：16&#x2F;36</li>
+</ul>
+<h3 id="遇到的坑"><a href="#遇到的坑" class="headerlink" title="遇到的坑"></a>遇到的坑</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>gblsigntool 模块缺失</td>
+<td>修改 Android.bp 删除测试模块</td>
+</tr>
+<tr>
+<td>VNDK v30 缺失</td>
+<td>修改 gsi_release.mk 删除 v30 要求</td>
+</tr>
+<tr>
+<td>Docker VM 内存不足</td>
+<td>settings-store.json 改 memoryMiB&#x3D;32768</td>
+</tr>
+</tbody></table>
+<h2 id="Android-Studio-阅读源码"><a href="#Android-Studio-阅读源码" class="headerlink" title="Android Studio 阅读源码"></a>Android Studio 阅读源码</h2><h3 id="idegen-生成项目文件"><a href="#idegen-生成项目文件" class="headerlink" title="idegen 生成项目文件"></a>idegen 生成项目文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">m idegen</span><br><span class="line">development/tools/idegen/idegen.sh</span><br></pre></td></tr></table></figure>
+
+<p>生成 <code>android.ipr</code>（IntelliJ 项目）和 <code>android.iml</code>（模块定义）。</p>
+<h3 id="AS-配置要点"><a href="#AS-配置要点" class="headerlink" title="AS 配置要点"></a>AS 配置要点</h3><table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>值</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>modules.xml</td>
+<td>指向 <code>android.iml</code></td>
+<td>AS 默认创建空壳 iml</td>
+</tr>
+<tr>
+<td>项目 SDK</td>
+<td><strong>No SDK</strong></td>
+<td>避免跳转到 SDK stub</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>-Xmx12g</td>
+<td>AOSP 源码量大</td>
+</tr>
+<tr>
+<td>content.dat</td>
+<td>清缓存要连全局</td>
+<td>防止索引过滤</td>
+</tr>
+</tbody></table>
+<h3 id="为什么项目-SDK-设-No-SDK"><a href="#为什么项目-SDK-设-No-SDK" class="headerlink" title="为什么项目 SDK 设 No SDK"></a>为什么项目 SDK 设 No SDK</h3><p>AOSP 源码是自包含的——<code>frameworks/base/core/java/</code> 就是真实实现。<br>如果设成 Android API 36 Platform，符号解析走 SDK 的 <code>android.jar</code>（只有签名的 stub），跳转会到 <code>.class</code> 而非源码。</p>
+<h2 id="VSCode-clangd-阅读-C-源码"><a href="#VSCode-clangd-阅读-C-源码" class="headerlink" title="VSCode + clangd 阅读 C++ 源码"></a>VSCode + clangd 阅读 C++ 源码</h2><h3 id="compile-commands-json-生成"><a href="#compile-commands-json-生成" class="headerlink" title="compile_commands.json 生成"></a>compile_commands.json 生成</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ninja 导出 compdb</span></span><br><span class="line">ninja -C out/soong/.intermediates -t compdb &gt; compile_commands.json</span><br></pre></td></tr></table></figure>
+
+<h3 id="关键修复"><a href="#关键修复" class="headerlink" title="关键修复"></a>关键修复</h3><p>原始 compdb 的 directory 字段是 Docker 容器路径 <code>/aosp</code>，本机路径是 <code>/Users/xxx/aosp-r4</code>。需要修正：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> entry <span class="keyword">in</span> data:</span><br><span class="line">    <span class="keyword">if</span> entry[<span class="string">&#x27;directory&#x27;</span>] == <span class="string">&#x27;/aosp&#x27;</span>:</span><br><span class="line">        entry[<span class="string">&#x27;directory&#x27;</span>] = <span class="string">&#x27;/Users/soycodetrail/aosp-r4&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>同时过滤掉 <code>out/</code>（生成文件）和 <code>external/</code>（第三方库），从 10 万条压缩到 1 万条。</p>
+<h3 id="clangd-配置"><a href="#clangd-配置" class="headerlink" title=".clangd 配置"></a>.clangd 配置</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">CompileFlags:</span></span><br><span class="line">  <span class="attr">CompilationDatabase:</span> <span class="string">/Users/soycodetrail/aosp-r4</span></span><br></pre></td></tr></table></figure>
+
+<p>用树内 prebuilt clangd（<code>prebuilts/clang/host/darwin-x86/clang-r563880c</code>），版本与 compdb 匹配。</p>
+
+  </div>
+
+  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+  <section class="follow-card">
+    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+    <div class="follow-grid">
+      <div class="follow-block">
+        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+        <div class="follow-text">
+          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+        </div>
+      </div>
+      <div class="follow-block">
+        <div class="follow-text">
+          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+  </section>
+
+  <nav class="post-nav">
+    <a class="post-nav__prev" href="/2026/07/28/aosp-read-source/">← AOSP 源码阅读环境配置：Android Studio 跳转 + VSCode clangd 双工具链</a>
+    <a class="post-nav__next" href="/2026/07/28/build-personal-website/">一台服务器搭起个人技术博客：Vue3 + Supabase + Nginx 全栈实战 →</a>
+  </nav>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 豆奶与程序猫 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 · 托管于 GitHub Pages</p>
+      <p class="footer-social">
+        <a href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">📕 小红书：豆奶与程序猫</a>
+        <span>·</span>
+        <a href="https://github.com/soycodetrail" target="_blank" rel="noopener">💻 GitHub</a>
+        <span>·</span>
+        <a href="/atom.xml" target="_blank" rel="noopener">📰 RSS</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

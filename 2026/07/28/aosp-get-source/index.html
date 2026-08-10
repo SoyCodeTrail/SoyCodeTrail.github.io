@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>在 macOS 上获取 Android 16 源码：从零到 196GB 完整拉取 | 豆奶与程序猫的技术博客</title>
+  <meta name="description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta name="author" content="豆奶与程序猫">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="在 macOS 上获取 Android 16 源码：从零到 196GB 完整拉取">
+  <meta property="og:description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta property="og:url" content="https://soycodetrail.github.io/2026/07/28/aosp-get-source/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
+  <link rel="sitemap" href="/sitemap.xml" type="application/xml">
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
+      <nav class="site-nav">
+        <a href="/">首页</a>
+        <a href="/archives">归档</a>
+        <a href="/tags">标签</a>
+        <a href="/about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container site-main">
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">在 macOS 上获取 Android 16 源码：从零到 196GB 完整拉取</h1>
+    <div class="post-meta">
+      <span>📅 2026-07-28</span>
+      
+      <span>⏱️ 12分钟</span>
+      
+    </div>
+    <div class="post-tags">
+      
+        <a class="tag" href="/tags/AOSP/">#AOSP</a>
+      
+        <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+      
+        <a class="tag" href="/tags/repo/">#repo</a>
+      
+        <a class="tag" href="/tags/%E6%B8%85%E5%8D%8E%E9%95%9C%E5%83%8F/">#清华镜像</a>
+      
+    </div>
+  </header>
+
+  <div class="post-content">
+    <p>搞 Android 的迟早会碰到这一步：光看 SDK 文档不够用了，得翻 Framework 源码才能搞清楚一个 <code>Activity</code> 到底是怎么 start 起来的，或者想自己编一个 SystemUI 看看改完啥效果。这时候就得把整个 AOSP（Android Open Source Project）源码拉下来。</p>
+<p>这篇记一下在 macOS Apple Silicon（M1&#x2F;M2&#x2F;M3）上把 Android 16 完整源码搞到本地的全过程，包括踩过的坑。最终拉下来的体积是 <strong>196GB</strong>，别被这个数字吓到，下面一步一步来。</p>
+<h2 id="为什么非得要源码"><a href="#为什么非得要源码" class="headerlink" title="为什么非得要源码"></a>为什么非得要源码</h2><p>Android SDK 给的是编译好的 jar 和 API，看不到实现。遇到下面这些场景就只能上源码：</p>
+<ul>
+<li><strong>读 Framework 源码</strong>：比如 <code>ActivityManagerService</code> 怎么调度 Activity、<code>WindowManager</code> 怎么算窗口层级，SDK 里全是 stub，源码才是真相。</li>
+<li><strong>编译 SystemUI &#x2F; Launcher3</strong>：想改状态栏样式、加个快捷开关，得整个 <code>packages/apps/</code> 目录自己编译。</li>
+<li><strong>改系统行为</strong>：魔改开机动画、调整权限策略、给某台设备做定制 ROM。</li>
+<li><strong>排查诡异崩溃</strong>：有些栈帧直接进到 Framework 内部，没源码断点都打不进去。</li>
+</ul>
+<p>简单说，做应用层够不着底层，做系统层没源码等于瞎子摸象。</p>
+<h2 id="环境要求（先把这些备齐）"><a href="#环境要求（先把这些备齐）" class="headerlink" title="环境要求（先把这些备齐）"></a>环境要求（先把这些备齐）</h2><h3 id="磁盘空间：留足-200G-以上"><a href="#磁盘空间：留足-200G-以上" class="headerlink" title="磁盘空间：留足 200G 以上"></a>磁盘空间：留足 200G 以上</h3><p>这是最容易翻车的一点。源码本身拉下来约 196GB，这还没算编译产物。一旦执行 <code>m</code> 全量编译，<code>out/</code> 目录还会再吃掉 100G+。所以<strong>给 AOSP 单独准备一个至少 350G 空闲的盘</strong>，不然拉到一半磁盘满了，前功尽弃。</p>
+<p>建议放外接 SSD，速度还比机械盘快不少。</p>
+<h3 id="网络：国内必须走镜像"><a href="#网络：国内必须走镜像" class="headerlink" title="网络：国内必须走镜像"></a>网络：国内必须走镜像</h3><p>AOSP 源码托管在 Google 的服务器上（<code>android.googlesource.com</code>），国内直连基本是死的，挂代理也不稳定，几百个 git 仓库同时拉，代理随时挂。</p>
+<p>正解是走<strong>清华 TUNA 镜像</strong>（<code>aosp.tuna.tsinghua.edu.cn</code>），教育网和大部分宽带都能跑到 75MB&#x2F;s 左右，全程不用代理。</p>
+<h3 id="repo-工具"><a href="#repo-工具" class="headerlink" title="repo 工具"></a>repo 工具</h3><p>AOSP 不是单个 git 仓库，是几百个 git 仓库组成的”超级仓库”，需要一个叫 <code>repo</code> 的工具来统一管理。这个工具本身是个 Python 脚本，安装见下一节。</p>
+<h2 id="装-repo-工具"><a href="#装-repo-工具" class="headerlink" title="装 repo 工具"></a>装 repo 工具</h2><h3 id="通过清华镜像装-repo"><a href="#通过清华镜像装-repo" class="headerlink" title="通过清华镜像装 repo"></a>通过清华镜像装 repo</h3><p>macOS 上推荐直接用 Homebrew，但 brew 装的 repo 有时候版本偏旧、还会去连 Google。手动装更可控：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建 bin 目录</span></span><br><span class="line"><span class="built_in">mkdir</span> -p ~/bin</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从清华镜像下 repo 脚本</span></span><br><span class="line">curl https://mirrors.tuna.tsinghua.edu.cn/git/git-repo &gt; ~/bin/repo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加可执行权限</span></span><br><span class="line"><span class="built_in">chmod</span> a+x ~/bin/repo</span><br></pre></td></tr></table></figure>
+
+<p>把 <code>~/bin</code> 加到 PATH。zsh 用户编辑 <code>~/.zshrc</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> PATH=~/bin:<span class="variable">$PATH</span></span><br></pre></td></tr></table></figure>
+
+<p>然后 <code>source ~/.zshrc</code> 生效。验证一下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">repo version</span><br><span class="line"><span class="comment"># 应该能看到 repo 版本号</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置-repo-走清华源"><a href="#配置-repo-走清华源" class="headerlink" title="配置 repo 走清华源"></a>配置 repo 走清华源</h3><p>repo 默认会去 <code>gerrit.googlesource.com</code> 拉它自己的更新，国内访问不到。在 <code>~/.zshrc</code> 里加一行环境变量强制走清华：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> REPO_URL=<span class="string">&#x27;https://mirrors.tuna.tsinghua.edu.cn/git/git-repo/&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>忘了配这个，repo 一启动就会卡在 “Get repo self update” 半天，最后超时报错。</p>
+<h3 id="配置-git"><a href="#配置-git" class="headerlink" title="配置 git"></a>配置 git</h3><p>repo 底层就是调 git，git 没配用户名邮箱会报 warning，建议先设好：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global user.name <span class="string">&quot;你的名字&quot;</span></span><br><span class="line">git config --global user.email <span class="string">&quot;你的邮箱&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>再设一个默认分支名，省得每次提示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --global init.defaultBranch main</span><br></pre></td></tr></table></figure>
+
+<p>大仓库拉取容易超时，把 git 的 buffer 调大、超时拉长：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git config --global http.postBuffer 524288000</span><br><span class="line">git config --global http.lowSpeedLimit 0</span><br><span class="line">git config --global http.lowSpeedTime 999999</span><br></pre></td></tr></table></figure>
+
+<p>这几个配置不改，拉大仓库经常 <code>RPC failed; curl 56 OpenSSL SSL_read</code> 报错。</p>
+<h2 id="选版本：为什么用-android-16-0-0-r4"><a href="#选版本：为什么用-android-16-0-0-r4" class="headerlink" title="选版本：为什么用 android-16.0.0_r4"></a>选版本：为什么用 android-16.0.0_r4</h2><p>AOSP 有几千个 tag，每个对应一个发布版本。别上来就拉 <code>main</code> 分支。</p>
+<h3 id="为什么不用-main-分支"><a href="#为什么不用-main-分支" class="headerlink" title="为什么不用 main 分支"></a>为什么不用 main 分支</h3><p><code>main</code> 分支是开发主线，三个坑：</p>
+<ol>
+<li><strong>不稳定</strong>：主线代码随时在变，可能今天能编明天就编不过。</li>
+<li><strong>模块缺失</strong>：很多预编译产物还没上传，编译时各种 <code>file not found</code>。</li>
+<li><strong>依赖飘</strong>：某个仓库今天指向 A commit，明天 rebase 了，二次 sync 行为都变了。</li>
+</ol>
+<p>学习和稳定编译，认准<strong>发布 tag</strong>。</p>
+<h3 id="android-16-0-0-r4"><a href="#android-16-0-0-r4" class="headerlink" title="android-16.0.0_r4"></a>android-16.0.0_r4</h3><p>这是个稳定的 Android 16 release tag，对应的版本号查得到，编出来的东西和 Pixel 上跑的一致。</p>
+<h3 id="怎么查可用-tag-列表"><a href="#怎么查可用-tag-列表" class="headerlink" title="怎么查可用 tag 列表"></a>怎么查可用 tag 列表</h3><p>官方有个页面 <code>source.android.com/docs/setup/reference/build-numbers</code>，上面列了所有 codename、版本号、tag 对应关系。或者直接列远端 tag：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 初始化一个空仓库后用 git 查</span></span><br><span class="line"><span class="built_in">cd</span> .repo/manifests.git 2&gt;/dev/null</span><br><span class="line">git tag | grep android-16</span><br></pre></td></tr></table></figure>
+
+<p>挑 tag 的小窍门：编号越靠后（_r4、_r5）一般修的 bug 越多，尽量选同一系列里最新的那个。</p>
+<h2 id="拉源码（核心步骤）"><a href="#拉源码（核心步骤）" class="headerlink" title="拉源码（核心步骤）"></a>拉源码（核心步骤）</h2><p>下面是真正干活的部分。先建好工作目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p ~/aosp/android-16</span><br><span class="line"><span class="built_in">cd</span> ~/aosp/android-16</span><br></pre></td></tr></table></figure>
+
+<h3 id="repo-init：初始化"><a href="#repo-init：初始化" class="headerlink" title="repo init：初始化"></a>repo init：初始化</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">repo init -u https://aosp.tuna.tsinghua.edu.cn/platform/manifest -b android-16.0.0_r4</span><br></pre></td></tr></table></figure>
+
+<p>参数解释：</p>
+<ul>
+<li><code>-u</code>：manifest 仓库地址，<strong>这个 URL 必须是清华的</strong>，换成 Google 的就废了。</li>
+<li><code>-b</code>：分支&#x2F;tag，这里用 <code>android-16.0.0_r4</code>。</li>
+</ul>
+<p>这一步会下载 manifest（一个 XML，描述了几百个子仓库的位置），几秒到十几秒完成。完成后目录下会出现一个 <code>.repo/</code>。</p>
+<p>如果提示要选颜色、登录信息，按提示随便填，不影响。</p>
+<h3 id="repo-sync：真正拉代码"><a href="#repo-sync：真正拉代码" class="headerlink" title="repo sync：真正拉代码"></a>repo sync：真正拉代码</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">repo <span class="built_in">sync</span> -c -j8</span><br></pre></td></tr></table></figure>
+
+<p>参数解释：</p>
+<ul>
+<li><code>-c</code>：只拉当前分支，不拉其他分支的冗余数据，<strong>能省一大半流量</strong>。这个不加上，几百个仓库全分支都拉一遍，磁盘和网络双爆。</li>
+<li><code>-j8</code>：8 个并发，相当于同时开 8 条线拉。Apple Silicon 上 <code>-j8</code> 到 <code>-j16</code> 都行，看网络和 CPU。</li>
+</ul>
+<h3 id="实测速度和耗时"><a href="#实测速度和耗时" class="headerlink" title="实测速度和耗时"></a>实测速度和耗时</h3><p>清华镜像国内直连，挂校园网或千兆宽带能稳定跑到 <strong>75MB&#x2F;s</strong> 左右。196GB 的量，理想情况算下来 45 分钟左右，实际因为小文件多、有些仓库冷门，<strong>1～2 小时</strong>比较常见。挂着别管它，去喝杯咖啡。</p>
+<p>中途看不到进度别慌，repo 输出不太友好，可以通过 <code>.repo/</code> 目录的大小增长来判断在动。</p>
+<h2 id="拉取过程中常见的坑"><a href="#拉取过程中常见的坑" class="headerlink" title="拉取过程中常见的坑"></a>拉取过程中常见的坑</h2><h3 id="网络断了"><a href="#网络断了" class="headerlink" title="网络断了"></a>网络断了</h3><p>最常见。家里网络抖一下、笔记本合盖睡眠、Wi-Fi 切换，repo sync 就中断了。</p>
+<p><strong>好消息</strong>：repo sync 支持断点续传。直接重跑一遍就行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">repo <span class="built_in">sync</span> -c -j8</span><br></pre></td></tr></table></figure>
+
+<p>它会跳过已经拉完的仓库，只继续没拉完的。不用清缓存、不用删东西。</p>
+<h3 id="某个项目损坏：unsupported-checkout-state"><a href="#某个项目损坏：unsupported-checkout-state" class="headerlink" title="某个项目损坏：unsupported checkout state"></a>某个项目损坏：unsupported checkout state</h3><p>报错大概长这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">error: in sync -c -j8</span><br><span class="line">fatal: unsupported checkout state</span><br></pre></td></tr></table></figure>
+
+<p>通常是某个子仓库被中断时 git 状态乱了。处理方法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进到出问题的那个项目目录（repo 会告诉你哪个）</span></span><br><span class="line"><span class="built_in">cd</span> 出问题的项目路径</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重置干净</span></span><br><span class="line">git checkout .</span><br><span class="line">git clean -fdx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者更狠的，直接删掉整个目录，让 repo 重新拉</span></span><br><span class="line"><span class="built_in">cd</span> ..</span><br><span class="line"><span class="built_in">rm</span> -rf 出问题的项目目录</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新 sync</span></span><br><span class="line">repo <span class="built_in">sync</span> -c -j8 项目名</span><br></pre></td></tr></table></figure>
+
+<p>最后那条命令可以只 sync 指定项目，不用整棵树重来。</p>
+<h3 id="repo-fatal-Cannot-fetch-…-SecurityHook"><a href="#repo-fatal-Cannot-fetch-…-SecurityHook" class="headerlink" title="repo: fatal: Cannot fetch … (SecurityHook)"></a>repo: fatal: Cannot fetch … (SecurityHook)</h3><p>偶尔会撞到 git 的安全钩子。临时放开：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --global --add safe.directory <span class="string">&#x27;*&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="macOS-文件系统大小写不敏感"><a href="#macOS-文件系统大小写不敏感" class="headerlink" title="macOS 文件系统大小写不敏感"></a>macOS 文件系统大小写不敏感</h3><p>这个坑比较隐蔽。macOS 默认的 APFS 是<strong>大小写不敏感</strong>（case-insensitive），而 AOSP 里有些文件名只在大小写上有区别（比如 <code>Utils.java</code> 和 <code>utils.java</code>）。在 Linux 上没事，在 macOS 上 checkout 时一个会覆盖另一个，编译就出怪问题。</p>
+<p><strong>解决方案</strong>：建一个大小写敏感的稀疏磁盘映像，把 AOSP 放里面。</p>
+<p>用磁盘工具（Disk Utility）建：</p>
+<ol>
+<li>选 “APFS（区分大小写）” 格式</li>
+<li>大小给 400GB 起</li>
+<li>挂载到 <code>/Volumes/AOSP</code></li>
+</ol>
+<p>或者命令行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个稀疏 bundle，大小写敏感 APFS</span></span><br><span class="line">hdiutil create -size 400g -<span class="built_in">type</span> SPARSEBUNDLE -fs <span class="string">&quot;Case-sensitive APFS&quot;</span> -volname AOSP ~/aosp.sparsebundle</span><br><span class="line"></span><br><span class="line"><span class="comment"># 挂载</span></span><br><span class="line">hdiutil attach ~/aosp.sparsebundle</span><br><span class="line"></span><br><span class="line"><span class="comment"># 之后源码都拉到 /Volumes/AOSP 下</span></span><br></pre></td></tr></table></figure>
+
+<p>注意：稀疏映像是按需扩展的，建 400G 不会立刻占满 400G，但随着写入会持续长大，<strong>别让它撑爆宿主盘</strong>。</p>
+<h3 id="耗时太久、卡住不动"><a href="#耗时太久、卡住不动" class="headerlink" title="耗时太久、卡住不动"></a>耗时太久、卡住不动</h3><p>如果是某个仓库卡半天，可以单独跳过它继续拉别的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 跳过失败项继续</span></span><br><span class="line">repo <span class="built_in">sync</span> -c -j8 --fail-fast=no</span><br></pre></td></tr></table></figure>
+
+<p>或者降低并发，避开网络拥塞：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">repo <span class="built_in">sync</span> -c -j4</span><br></pre></td></tr></table></figure>
+
+<p>并发不是越高越好，太高反而触发服务器限流。</p>
+<h2 id="拉完后的目录结构"><a href="#拉完后的目录结构" class="headerlink" title="拉完后的目录结构"></a>拉完后的目录结构</h2><p>sync 完，进到根目录 <code>ls</code> 一下，大概长这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">art/       build/     cts/       dalvik/    developers/</span><br><span class="line">development/  device/   external/  frameworks/  hardware/</span><br><span class="line">libcore/   libnativehelper/  packages/  pdk/      platform_testing/</span><br><span class="line">prebuilts/ sdk/       system/    test/      toolchain/</span><br><span class="line">out/       .repo/</span><br></pre></td></tr></table></figure>
+
+<p>几个重点目录：</p>
+<h3 id="frameworks-base"><a href="#frameworks-base" class="headerlink" title="frameworks&#x2F;base"></a>frameworks&#x2F;base</h3><p><strong>Framework 源码</strong>，整个 Android 最核心的代码就在这。<code>Activity</code>、<code>Service</code>、<code>WindowManager</code>、<code>PackageManager</code> 这些类的实现全在这。读源码、改系统行为，基本都在这个目录里转。Java + native 混合，子目录按 <code>core/java</code>、<code>services</code>、<code>base</code> 这样分。</p>
+<h3 id="packages-apps-Launcher3"><a href="#packages-apps-Launcher3" class="headerlink" title="packages&#x2F;apps&#x2F;Launcher3"></a>packages&#x2F;apps&#x2F;Launcher3</h3><p><strong>系统应用源码</strong>。<code>packages/apps/</code> 下都是出厂自带 App：<code>Launcher3</code>（桌面）、<code>Settings</code>（设置）、<code>SystemUI</code>（状态栏、通知中心）、<code>Camera2</code> 等。想自己编译定制系统应用，改的就是这些。</p>
+<h3 id="out"><a href="#out" class="headerlink" title="out&#x2F;"></a>out&#x2F;</h3><p><strong>编译产物目录</strong>。刚拉完是空的（或不存在），等执行 <code>m</code> 编译后才会生成。里面是 <code>out/target/product/</code>，最终生成 <code>system.img</code>、<code>boot.img</code> 这些刷机镜像。前面说的 100G+ 编译产物就堆在这。</p>
+<p><strong>别手动改 out&#x2F; 下的东西</strong>，<code>m clean</code> 一键清空重建比手动删安全。</p>
+<h3 id="repo"><a href="#repo" class="headerlink" title=".repo&#x2F;"></a>.repo&#x2F;</h3><p><strong>repo 元数据</strong>。包括 manifest、所有子仓库的 git 对象库（git fetch 先拉到这，再 checkout 到工作区）、repo 自身。这个目录是断点续传的基础，删了就得从头再来，<strong>务必保留</strong>。</p>
+<h3 id="其他常见目录"><a href="#其他常见目录" class="headerlink" title="其他常见目录"></a>其他常见目录</h3><ul>
+<li><code>system/</code>：底层核心服务、<code>init</code>、<code>vold</code>、<code>SurfaceFlinger</code> 的源码。</li>
+<li><code>hardware/</code>：HAL 层，硬件抽象接口。</li>
+<li><code>external/</code>：第三方开源依赖，比如 OpenSSL、SQLite、Skia。</li>
+<li><code>prebuilts/</code>：预编译好的工具链（JDK、clang 等），编译时直接用。</li>
+</ul>
+<h2 id="拉完之后"><a href="#拉完之后" class="headerlink" title="拉完之后"></a>拉完之后</h2><p>源码到手只是第一步。下一步通常是配编译环境（装 OpenJDK、设 <code>lunch</code> 选 target），然后 <code>m</code> 全量编译。那又是另一个大坑，Apple Silicon 上编 AOSP 还得用 <code>arm64</code> 的 target，x86 的 target 跑不动，这些留到下一篇再写。</p>
+<p>现在先把源码稳稳拉下来，能 grep、能看、能跳转，已经够啃好一阵子了。</p>
+
+  </div>
+
+  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+  <section class="follow-card">
+    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+    <div class="follow-grid">
+      <div class="follow-block">
+        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+        <div class="follow-text">
+          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+        </div>
+      </div>
+      <div class="follow-block">
+        <div class="follow-text">
+          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+  </section>
+
+  <nav class="post-nav">
+    <a class="post-nav__prev" href="/2026/07/28/ai-coding-guide-2026/">← 2026年，零基础怎么学 AI 和编程</a>
+    <a class="post-nav__next" href="/2026/07/28/aosp-read-source/">AOSP 源码阅读环境配置：Android Studio 跳转 + VSCode clangd 双工具链 →</a>
+  </nav>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 豆奶与程序猫 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 · 托管于 GitHub Pages</p>
+      <p class="footer-social">
+        <a href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">📕 小红书：豆奶与程序猫</a>
+        <span>·</span>
+        <a href="https://github.com/soycodetrail" target="_blank" rel="noopener">💻 GitHub</a>
+        <span>·</span>
+        <a href="/atom.xml" target="_blank" rel="noopener">📰 RSS</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

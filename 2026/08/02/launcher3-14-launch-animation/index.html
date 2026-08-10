@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Launcher3 源码精读（14）：应用启动与远程动效时序图 | 豆奶与程序猫的技术博客</title>
+  <meta name="description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta name="author" content="豆奶与程序猫">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Launcher3 源码精读（14）：应用启动与远程动效时序图">
+  <meta property="og:description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta property="og:url" content="https://soycodetrail.github.io/2026/08/02/launcher3-14-launch-animation/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
+  <link rel="sitemap" href="/sitemap.xml" type="application/xml">
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
+      <nav class="site-nav">
+        <a href="/">首页</a>
+        <a href="/archives">归档</a>
+        <a href="/tags">标签</a>
+        <a href="/about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container site-main">
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">Launcher3 源码精读（14）：应用启动与远程动效时序图</h1>
+    <div class="post-meta">
+      <span>📅 2026-08-02</span>
+      
+      <span>⏱️ 15分钟</span>
+      
+    </div>
+    <div class="post-tags">
+      
+        <a class="tag" href="/tags/AOSP/">#AOSP</a>
+      
+        <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+      
+        <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
+      
+        <a class="tag" href="/tags/Framework/">#Framework</a>
+      
+        <a class="tag" href="/tags/RemoteAnimation/">#RemoteAnimation</a>
+      
+        <a class="tag" href="/tags/%E6%97%B6%E5%BA%8F%E5%9B%BE/">#时序图</a>
+      
+    </div>
+  </header>
+
+  <div class="post-content">
+    <h1 id="14-应用启动与远程动效时序图"><a href="#14-应用启动与远程动效时序图" class="headerlink" title="14 - 应用启动与远程动效时序图"></a>14 - 应用启动与远程动效时序图</h1><blockquote>
+<p>源码树：<code>/Users/soycodetrail/aosp-r4</code>（android-16.0.0_r4）<br>整理日期：2026-07-22<br>范围：点击桌面图标 → Launcher 构建启动选项（附带 RemoteAnimation runner）→ 跨进程提交 ATMS → WMS Transitions 就绪 → Shell 兼容桥接 → Launcher 执行图标→应用窗口展开动效 → 结束回调<br>所有类名&#x2F;方法名均经 grep 在源码中核对；<code>file:line</code> 对应当前源码树。<br>交互式 HTML（平移缩放&#x2F;点击复制&#x2F;逐帧播放）：<code>~/aosp-r4/Documents/launcher-remote-animation/launcher-app-open-remote-animation.html</code><br>相关笔记：[[00-Launcher3源码精读总览]] · [[09-动画系统]] · [[SurfaceFlinger 单帧合成流程时序图]] · [[20-system_server 精读方案]]</p>
+</blockquote>
+<h2 id="关键架构事实（此版本-aosp-r4-Android-16）"><a href="#关键架构事实（此版本-aosp-r4-Android-16）" class="headerlink" title="关键架构事实（此版本 aosp-r4 &#x2F; Android 16）"></a>关键架构事实（此版本 aosp-r4 &#x2F; Android 16）</h2><ol>
+<li><strong>WMS 已彻底迁移到「服务端 Transitions」系统</strong>：<code>TransitionController</code> &#x2F; <code>Transition</code> &#x2F; <code>ITransitionPlayer</code> &#x2F; <code>IRemoteTransition</code> &#x2F; <code>TransitionInfo</code>。旧的 <code>RemoteAnimationController</code>、WM 侧 <code>RemoteAnimationAdapter</code>、<code>AppTransition</code> 在本分支<strong>已不存在</strong>（<code>AppTransition.isReady()</code> 之类的旧教材写法全部失效）。</li>
+<li><strong>Launcher3 仍用旧版 <code>IRemoteAnimationRunner</code> &#x2F; <code>RemoteAnimationTarget</code> API</strong>，靠 <strong>Shell 层</strong>桥接：<code>RemoteAnimationRunnerCompat.toRemoteTransition()</code>（<code>RemoteAnimationRunnerCompat.java:76</code>）把旧 runner 包成现代 <code>IRemoteTransition</code>；<code>RemoteTransitionHandler.startAnimation()</code>（<code>RemoteTransitionHandler.java:117</code>）把 <code>TransitionInfo</code> 转成 <code>RemoteAnimationTarget[]</code> 后回调 <code>LauncherAnimationRunner.onAnimationStart(...)</code>。</li>
+<li><strong>App-OPEN（打开应用）动效是「每次启动按需附带」的</strong>，不是全局注册。点击链路在 <code>QuickstepTransitionManager.getActivityLaunchOptions()</code>（<code>QuickstepTransitionManager.java:362</code>）里把 runner 打包进 <code>ActivityOptions.makeRemoteAnimation(...)</code> 随 <code>startActivity</code> 一起提交。启动期 <code>registerRemoteAnimations()</code>（<code>QuickstepLauncher.java:357</code>）注册的是<strong>反方向</strong>（app→回桌面，<code>WallpaperOpenLauncherAnimationRunner</code>，处理 <code>TRANSIT_OLD_WALLPAPER_OPEN</code>）。</li>
+<li>**runner 没有 <code>onAnimationEnd</code>**：<code>IRemoteAnimationRunner</code> 只有 <code>onAnimationStart</code> &#x2F; <code>onAnimationCancelled</code>。动画结束通过 <code>AnimationResult</code>（<code>extends IRemoteAnimationFinishedCallback.Stub</code>，<code>LauncherAnimationRunner.java:131</code>）回调到 Shell，再到 WMS <code>TransitionController.finishTransition</code>。</li>
+<li>**图标点击启动不经过 <code>ActivityManagerWrapper</code>**（那是 Recents 任务管理用的）；走标准 <code>context.startActivity(intent, optionsBundle)</code>（<code>ActivityContext.java:530</code>）。</li>
+<li><code>RemoteAnimationTarget</code> 字段叫 <code>screenSpaceBounds</code>，<strong>没有</strong> <code>screenBounds</code>（<code>RemoteAnimationTarget.java:176</code>）。</li>
+</ol>
+<hr>
+<h2 id="一、Mermaid-时序图"><a href="#一、Mermaid-时序图" class="headerlink" title="一、Mermaid 时序图"></a>一、Mermaid 时序图</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    autonumber</span><br><span class="line"></span><br><span class="line">    box rgb(59, 130, 246) Launcher 应用进程</span><br><span class="line">        actor U as User</span><br><span class="line">        participant BT as BubbleTextView</span><br><span class="line">        participant ICH as ItemClickHandler</span><br><span class="line">        participant QTM as QuickstepTransitionManager</span><br><span class="line">        participant LAR as LauncherAnimationRunner</span><br><span class="line">    end</span><br><span class="line">    box rgb(34, 197, 94) SystemServer WMS</span><br><span class="line">        participant ATMS as ActivityTaskManagerService</span><br><span class="line">        participant TC as TransitionController</span><br><span class="line">    end</span><br><span class="line">    box rgb(139, 92, 246) Shell 兼容桥接层</span><br><span class="line">        participant TR as Transitions</span><br><span class="line">        participant RTH as RemoteTransitionHandler</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    rect rgb(232, 244, 248)</span><br><span class="line">    Note over U,ICH: ① 图标点击与启动选项构建</span><br><span class="line">    U-&gt;&gt;BT: 点击应用图标 onTap</span><br><span class="line">    BT-&gt;&gt;ICH: onClick(view) [ItemClickHandler.java:91]</span><br><span class="line">    ICH-&gt;&gt;ICH: startAppShortcutOrInfoActivity() [:377 → :422]</span><br><span class="line">    Note over ICH: 经 Launcher.startActivitySafely [Launcher.java:2106] → ActivityContext.startActivitySafely [ActivityContext.java:496]</span><br><span class="line">    ICH-&gt;&gt;QTM: getActivityLaunchOptions(view, item) [QuickstepTransitionManager.java:362]</span><br><span class="line">    activate QTM</span><br><span class="line">    QTM-&gt;&gt;QTM: createAppLaunchRunner(): AppLaunchAnimationRunner [:422 → :2002]</span><br><span class="line">    QTM-&gt;&gt;QTM: createAppLaunchRemoteTransition → toRemoteTransition() [RemoteAnimationRunnerCompat.java:76]</span><br><span class="line">    QTM-&gt;&gt;QTM: ActivityOptions.makeRemoteAnimation(adapter, remoteTransition)</span><br><span class="line">    QTM--&gt;&gt;ICH: ActivityOptionsWrapper</span><br><span class="line">    deactivate QTM</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    rect rgb(232, 245, 233)</span><br><span class="line">    Note over ICH,TC: ② 跨进程提交到 SystemServer</span><br><span class="line">    ICH-&gt;&gt;ATMS: startActivity(intent, optionsBundle) [ActivityContext.java:530]</span><br><span class="line">    activate ATMS</span><br><span class="line">    Note over ATMS: ActivityStarter → ActivityRecord.setOptions [ActivityRecord.java:5116] 写入 mPendingRemoteTransition [:5122]</span><br><span class="line">    ATMS-&gt;&gt;TC: requestStartDisplayTransition() [TransitionController.java:839]</span><br><span class="line">    activate TC</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    rect rgb(237, 231, 246)</span><br><span class="line">    Note over TC,RTH: ③ 过渡就绪 Transition Ready</span><br><span class="line">    TC-&gt;&gt;TC: 收集窗口变更 → 构造 TransitionInfo</span><br><span class="line">    TC-&gt;&gt;TR: ITransitionPlayer.onTransitionReady(token, info, t, finishT) [Transition.java:2092]</span><br><span class="line">    activate TR</span><br><span class="line">    TR-&gt;&gt;RTH: startAnimation(token, info, startT, finishT) [RemoteTransitionHandler.java:117]</span><br><span class="line">    activate RTH</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    rect rgb(255, 243, 224)</span><br><span class="line">    Note over RTH,LAR: ④ 远程动效执行 — 兼容桥接 TransitionInfo → RemoteAnimationTarget[]</span><br><span class="line">    RTH-&gt;&gt;LAR: IRemoteTransition.startAnimation(token, info, t, finishCallback) [RemoteTransitionHandler.java:181]</span><br><span class="line">    activate LAR</span><br><span class="line">    Note over RTH,LAR: toRemoteTransition 适配器把 TransitionInfo 转为 RemoteAnimationTarget 数组</span><br><span class="line">    LAR-&gt;&gt;LAR: onAnimationStart(transit, appTargets, wp, nonApps, finishedCallback) [LauncherAnimationRunner.java:82]</span><br><span class="line">    Note over LAR: @BinderThread 回调,随后 post 到 UI 线程执行</span><br><span class="line">    LAR-&gt;&gt;QTM: AppLaunchAnimationRunner.onAnimationStart(targets) [QuickstepTransitionManager.java:2013]</span><br><span class="line">    activate QTM</span><br><span class="line">    QTM-&gt;&gt;QTM: composeIconLaunchAnimator(anim, view, targets) [:526]</span><br><span class="line">    QTM-&gt;&gt;LAR: AnimationResult.setAnimation(AnimatorSet) [LauncherAnimationRunner.java:171]</span><br><span class="line">    Note over LAR,QTM: AnimatorSet 播放:图标缩放 → 应用窗口展开 (CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON)</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    rect rgb(224, 247, 250)</span><br><span class="line">    Note over LAR,TC: ⑤ 动效结束与清理</span><br><span class="line">    LAR-&gt;&gt;RTH: finishedCallback.onAnimationFinished() (IRemoteAnimationFinishedCallback)</span><br><span class="line">    deactivate LAR</span><br><span class="line">    RTH-&gt;&gt;TR: IRemoteTransitionFinishedCallback.onTransitionFinished(wct, sct)</span><br><span class="line">    TR-&gt;&gt;TC: IWindowOrganizerController.finishTransition()</span><br><span class="line">    deactivate RTH</span><br><span class="line">    deactivate TR</span><br><span class="line">    TC-&gt;&gt;TC: finishTransition() [TransitionController.java:1075]</span><br><span class="line">    deactivate TC</span><br><span class="line">    deactivate ATMS</span><br><span class="line">    QTM-&gt;&gt;QTM: mOnEndCallback.executeAllAndDestroy()</span><br><span class="line">    deactivate QTM</span><br><span class="line">    TC--&gt;&gt;U: 应用窗口可见,远程动效完成</span><br><span class="line">    end</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="二、编号调用序列（带-file-line）"><a href="#二、编号调用序列（带-file-line）" class="headerlink" title="二、编号调用序列（带 file:line）"></a>二、编号调用序列（带 <code>file:line</code>）</h2><h3 id="①-Launcher-应用进程：图标点击-→-启动选项"><a href="#①-Launcher-应用进程：图标点击-→-启动选项" class="headerlink" title="① Launcher 应用进程：图标点击 → 启动选项"></a>① Launcher 应用进程：图标点击 → 启动选项</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"> 1. BubbleTextView   点击图标,OnClickListener = getItemOnClickListener()  Launcher.java:3045</span><br><span class="line"> 2. QuickstepLauncher onItemClicked → super.getItemOnClickListener().onClick  QuickstepLauncher.java:524</span><br><span class="line"> 3. ItemClickHandler onClick(view)                                      ItemClickHandler.java:91</span><br><span class="line"> 4. ItemClickHandler  WorkspaceItemInfo → onClickAppShortcut            ItemClickHandler.java:353</span><br><span class="line"> 5. ItemClickHandler  startAppShortcutOrInfoActivity                    ItemClickHandler.java:377 → :422</span><br><span class="line"> 6. Launcher          startActivitySafely(v, intent, item)              Launcher.java:2106 → super :2136</span><br><span class="line"> 7. ActivityContext   startActivitySafely (default)                     ActivityContext.java:496</span><br><span class="line"> 8. ActivityContext   getActivityLaunchOptions(v, item)                 ActivityContext.java:512 / :563</span><br><span class="line"> 9. QuickstepLauncher → mAppTransitionManager.getActivityLaunchOptions  QuickstepLauncher.java:1368</span><br><span class="line">10. QuickstepTransitionManager getActivityLaunchOptions(view, item)     QuickstepTransitionManager.java:362</span><br><span class="line">11.   createAppLaunchRunner(v, onEndCallback)                           QuickstepTransitionManager.java:422</span><br><span class="line">        - new AppLaunchAnimationRunner(v, onEndCallback)                QuickstepTransitionManager.java:2002</span><br><span class="line">        - new LauncherAnimationRunner(mHandler, mAppLaunchRunner, true) startAtFrontOfQueue=true</span><br><span class="line">12.   createAppLaunchRemoteTransition(appLaunchRunner)                  QuickstepTransitionManager.java:440</span><br><span class="line">        - appLaunchRunner.toRemoteTransition() → IRemoteTransition      RemoteAnimationRunnerCompat.java:76</span><br><span class="line">13.   ActivityOptions.makeRemoteAnimation(adapter, remoteTransition &quot;QuickstepLaunch&quot;)</span><br><span class="line">14. ActivityContext   context.startActivity(intent, optionsBundle) [IPC] ActivityContext.java:530</span><br></pre></td></tr></table></figure>
+
+<h3 id="②-SystemServer-WMS：提交-→-过渡就绪"><a href="#②-SystemServer-WMS：提交-→-过渡就绪" class="headerlink" title="② SystemServer &#x2F; WMS：提交 → 过渡就绪"></a>② SystemServer &#x2F; WMS：提交 → 过渡就绪</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">15. ActivityTaskManagerService  startActivity (binder 入口)</span><br><span class="line">16. ActivityStarter → ActivityRecord.setOptions(options)               ActivityRecord.java:5116</span><br><span class="line">      - mPendingRemoteAnimation = options.getRemoteAnimationAdapter()  :5120</span><br><span class="line">      - mPendingRemoteTransition = options.getRemoteTransition()       :5122</span><br><span class="line">17. ActivityRecord.applyOptionsAnimation                                ActivityRecord.java:5125</span><br><span class="line">18. TransitionController.requestStartDisplayTransition(...)             TransitionController.java:839</span><br><span class="line">19. (player 回调) ITransitionPlayer.requestStartTransition              TransitionController.java:2029</span><br><span class="line">20. WMS 收集窗口变更 → Transition 构造 TransitionInfo</span><br><span class="line">21. Transition  ITransitionPlayer.onTransitionReady(token, info, t, finishT)  Transition.java:2092</span><br></pre></td></tr></table></figure>
+
+<h3 id="③-Shell-兼容桥接：TransitionInfo-→-RemoteAnimationTarget"><a href="#③-Shell-兼容桥接：TransitionInfo-→-RemoteAnimationTarget" class="headerlink" title="③ Shell 兼容桥接：TransitionInfo → RemoteAnimationTarget[]"></a>③ Shell 兼容桥接：TransitionInfo → RemoteAnimationTarget[]</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">22. Transitions (implements ITransitionPlayer) onTransitionReady        Transitions.java:137</span><br><span class="line">23. Transitions  选 Handler → startAnimation 分发                       Transitions.java:1037 / :1074</span><br><span class="line">24. RemoteTransitionHandler startAnimation(token, info, startT, finishT) RemoteTransitionHandler.java:117</span><br><span class="line">25. RemoteTransitionHandler remote.getRemoteTransition().startAnimation  RemoteTransitionHandler.java:181</span><br><span class="line">26. IRemoteTransition.startAnimation (由 toRemoteTransition 产生)</span><br><span class="line">      - 内部把 TransitionInfo → RemoteAnimationTarget[] (apps/wp/nonApps)</span><br></pre></td></tr></table></figure>
+
+<h3 id="④-Launcher-执行：远程动效（核心）"><a href="#④-Launcher-执行：远程动效（核心）" class="headerlink" title="④ Launcher 执行：远程动效（核心）"></a>④ Launcher 执行：远程动效（核心）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">27. LauncherAnimationRunner onAnimationStart (Binder 线程)              LauncherAnimationRunner.java:82</span><br><span class="line">        参数: transit, appTargets[], wallpaperTargets[], nonApps[], finishedCallback</span><br><span class="line">28. LauncherAnimationRunner post 到 UI 线程 → getFactory().onAnimationStart</span><br><span class="line">29. AppLaunchAnimationRunner onAnimationStart(targets)                  QuickstepTransitionManager.java:2013</span><br><span class="line">        - launcherIsATargetWithMode / isLaunchingFromRecents 判定来源</span><br><span class="line">30.   (图标) composeIconLaunchAnimator(anim, mV, targets...)            QuickstepTransitionManager.java:526</span><br><span class="line">        (Widget) composeWidgetLaunchAnimator   (Recents) composeRecentsLaunchAnimator</span><br><span class="line">31.   addCujInstrumentation(anim, CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON)</span><br><span class="line">32.   result.setAnimation(anim, mLauncher, mOnEndCallback, skipFirstFrame) LauncherAnimationRunner.java:171</span><br><span class="line">33. AnimatorSet 播放: 图标缩放 → 应用窗口展开</span><br></pre></td></tr></table></figure>
+
+<h3 id="⑤-结束与清理"><a href="#⑤-结束与清理" class="headerlink" title="⑤ 结束与清理"></a>⑤ 结束与清理</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">34. AnimatorSet 结束 → AnimationResult.onAnimationFinished()            LauncherAnimationRunner.java:190 (:131 .Stub)</span><br><span class="line">        (AnimationResult extends IRemoteAnimationFinishedCallback.Stub)</span><br><span class="line">35. Shell 收到 → IRemoteTransitionFinishedCallback.onTransitionFinished(wct, sct)</span><br><span class="line">36. IWindowOrganizerController.finishTransition → TransitionController.finishTransition  TransitionController.java:1075</span><br><span class="line">37. AppLaunchAnimationRunner onAnimationCancelled / mOnEndCallback.executeAllAndDestroy (兜底)</span><br><span class="line">38. 应用窗口正式可见,Task 进入 ACTIVE</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>取消路径：若中途取消（超时&#x2F;抢占），WMS 经 <code>Transition.abort()</code> &#x2F; <code>postCleanupOnFailure()</code>，<br>回调 <code>LauncherAnimationRunner.onAnimationCancelled()</code>（<code>LauncherAnimationRunner.java:118</code>）→<br><code>AppLaunchAnimationRunner.onAnimationCancelled()</code>（<code>:2063</code>）执行 <code>mOnEndCallback</code> 兜底。</p>
+</blockquote>
+<hr>
+<h2 id="三、涉及的关键文件"><a href="#三、涉及的关键文件" class="headerlink" title="三、涉及的关键文件"></a>三、涉及的关键文件</h2><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>文件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Launcher 入口&#x2F;分发</td>
+<td><code>Launcher3/src/com/android/launcher3/&#123;Launcher.java,views/ActivityContext.java,touch/ItemClickHandler.java&#125;</code></td>
+</tr>
+<tr>
+<td>Launcher Quickstep</td>
+<td><code>Launcher3/quickstep/src/com/android/launcher3/uioverrides/QuickstepLauncher.java</code></td>
+</tr>
+<tr>
+<td>转场管理</td>
+<td><code>Launcher3/quickstep/src/com/android/launcher3/QuickstepTransitionManager.java</code>（含 <code>AppLaunchAnimationRunner</code> <code>WallpaperOpenLauncherAnimationRunner</code> <code>ContainerAnimationRunner</code>）</td>
+</tr>
+<tr>
+<td>远程动效 runner</td>
+<td><code>Launcher3/quickstep/src/com/android/launcher3/LauncherAnimationRunner.java</code>（<code>RemoteAnimationFactory</code> &#x2F; <code>AnimationResult</code>）</td>
+</tr>
+<tr>
+<td>兼容桥接</td>
+<td><code>frameworks/base/packages/SystemUI/animation/src/com/android/systemui/animation/RemoteAnimationRunnerCompat.java</code></td>
+</tr>
+<tr>
+<td>Shell Transitions</td>
+<td><code>frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/transition/&#123;Transitions.java,RemoteTransitionHandler.java&#125;</code></td>
+</tr>
+<tr>
+<td>WMS Transitions</td>
+<td><code>frameworks/base/services/core/java/com/android/server/wm/&#123;TransitionController.java,Transition.java,ActivityRecord.java&#125;</code></td>
+</tr>
+<tr>
+<td>AIDL 定义</td>
+<td><code>frameworks/base/core/java/android/view/&#123;IRemoteAnimationRunner.aidl,IRemoteAnimationFinishedCallback.aidl,RemoteAnimationTarget.java&#125;</code> · <code>frameworks/base/core/java/android/window/&#123;IRemoteTransition.aidl,IRemoteTransitionFinishedCallback.aidl,TransitionInfo.java&#125;</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="四、与-SurfaceFlinger-时序图的对照"><a href="#四、与-SurfaceFlinger-时序图的对照" class="headerlink" title="四、与 SurfaceFlinger 时序图的对照"></a>四、与 SurfaceFlinger 时序图的对照</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>应用启动远程动效</th>
+<th>[[SurfaceFlinger 单帧合成流程时序图]]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>触发</td>
+<td>用户点击（事件驱动，一次性）</td>
+<td>VSYNC（周期性，每帧）</td>
+</tr>
+<tr>
+<td>跨进程</td>
+<td>Launcher ↔ SystemServer ↔ Shell（3 进程 binder）</td>
+<td>App ↔ SF（2 进程 binder + fence）</td>
+</tr>
+<tr>
+<td>同步原语</td>
+<td><code>IRemoteAnimationFinishedCallback</code> &#x2F; <code>onTransitionFinished</code></td>
+<td>acquire&#x2F;release&#x2F;present fence</td>
+</tr>
+<tr>
+<td>关键迁移</td>
+<td>旧 <code>RemoteAnimationController</code> → 新 <code>TransitionController</code> + Shell 桥接</td>
+<td>旧 <code>onMessageReceived</code> → 新 Scheduler 双相 <code>commit/composite</code></td>
+</tr>
+</tbody></table>
+<p><strong>标签：</strong> #Launcher3 #远程动效 #WindowManager #Transitions #AOSP源码精读</p>
+
+  </div>
+
+  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+  <section class="follow-card">
+    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+    <div class="follow-grid">
+      <div class="follow-block">
+        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+        <div class="follow-text">
+          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+        </div>
+      </div>
+      <div class="follow-block">
+        <div class="follow-text">
+          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+  </section>
+
+  <nav class="post-nav">
+    <a class="post-nav__prev" href="/2026/08/02/launcher3-07-shortcuts-widgets/">← Launcher3 源码精读（07）：快捷方式与小组件</a>
+    <a class="post-nav__next" href="/2026/08/02/launcher3-13-package-management/">Launcher3 源码精读（13）：包管理与安装 →</a>
+  </nav>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 豆奶与程序猫 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 · 托管于 GitHub Pages</p>
+      <p class="footer-social">
+        <a href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">📕 小红书：豆奶与程序猫</a>
+        <span>·</span>
+        <a href="https://github.com/soycodetrail" target="_blank" rel="noopener">💻 GitHub</a>
+        <span>·</span>
+        <a href="/atom.xml" target="_blank" rel="noopener">📰 RSS</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

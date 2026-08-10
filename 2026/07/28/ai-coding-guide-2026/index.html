@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>2026年，零基础怎么学 AI 和编程 | 豆奶与程序猫的技术博客</title>
+  <meta name="description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta name="author" content="豆奶与程序猫">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="2026年，零基础怎么学 AI 和编程">
+  <meta property="og:description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta property="og:url" content="https://soycodetrail.github.io/2026/07/28/ai-coding-guide-2026/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
+  <link rel="sitemap" href="/sitemap.xml" type="application/xml">
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
+      <nav class="site-nav">
+        <a href="/">首页</a>
+        <a href="/archives">归档</a>
+        <a href="/tags">标签</a>
+        <a href="/about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container site-main">
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">2026年，零基础怎么学 AI 和编程</h1>
+    <div class="post-meta">
+      <span>📅 2026-07-28</span>
+      
+      <span>⏱️ 30分钟</span>
+      
+    </div>
+    <div class="post-tags">
+      
+        <a class="tag" href="/tags/AI/">#AI</a>
+      
+        <a class="tag" href="/tags/%E7%BC%96%E7%A8%8B/">#编程</a>
+      
+        <a class="tag" href="/tags/%E9%9B%B6%E5%9F%BA%E7%A1%80/">#零基础</a>
+      
+        <a class="tag" href="/tags/Python/">#Python</a>
+      
+        <a class="tag" href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/">#学习路线</a>
+      
+        <a class="tag" href="/tags/Prompt/">#Prompt</a>
+      
+    </div>
+  </header>
+
+  <div class="post-content">
+    <p>写给完全没基础的人——非科班、没写过代码、甚至中小学生，看完知道从哪开始、用什么工具、花多少钱、走哪条路。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E5%85%88%E6%90%9E%E6%B8%85%E6%A5%9A%E4%B8%80%E4%BB%B6%E4%BA%8B2026%E5%B9%B4%E5%AD%A6%E7%BC%96%E7%A8%8B%E8%B7%9F%E4%BB%A5%E5%89%8D%E4%B8%8D%E4%B8%80%E6%A0%B7%E4%BA%86">先搞清楚一件事</a> — 2026年学编程跟以前有什么不同</li>
+<li><a href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%E9%80%89%E4%B8%80%E9%97%A8%E8%AF%AD%E8%A8%80%E5%85%A5%E9%97%A8">第一步：选一门语言入门</a> — 为什么选 Python</li>
+<li><a href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%E5%AE%89%E8%A3%85%E7%8E%AF%E5%A2%8310%E5%88%86%E9%92%9F%E6%90%9E%E5%AE%9A">第二步：安装环境</a> — 在线学 vs 装 AI 编辑器</li>
+<li><a href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%E5%AD%A6-python-%E5%9F%BA%E7%A1%802-4%E5%91%A8">第三步：学 Python 基础</a> — 7个必学知识点</li>
+<li><a href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%E5%AD%A6-prompt-%E5%B7%A5%E7%A8%8B%E7%94%A8%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E6%8C%87%E6%8C%A5-ai">第四步：学 Prompt 工程</a> — 用人话指挥 AI 写代码</li>
+<li><a href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%E7%94%A8-ai-%E5%B8%AE%E4%BD%A0%E5%86%99%E4%BB%A3%E7%A0%81%E6%A0%B8%E5%BF%83%E6%8A%80%E8%83%BD">第五步：用 AI 帮你写代码</a> — AI 写代码工作流</li>
+<li><a href="#%E7%AC%AC%E5%85%AD%E6%AD%A5%E5%81%9A%E4%B8%80%E4%B8%AA%E5%AE%8C%E6%95%B4%E7%9A%84%E5%B0%8F%E9%A1%B9%E7%9B%AE1-2%E5%91%A8">第六步：做一个完整的小项目</a> — 10个新手项目</li>
+<li><a href="#%E7%AC%AC%E4%B8%83%E6%AD%A5%E4%BA%86%E8%A7%A3-ai-%E6%98%AF%E6%80%8E%E4%B9%88%E5%9B%9E%E4%BA%8B%E5%8F%AF%E9%80%89">第七步：了解 AI 是怎么回事</a> — AI到底是什么</li>
+<li><a href="#%E4%B8%AD%E5%B0%8F%E5%AD%A6%E7%94%9F%E5%AD%A6%E7%BC%96%E7%A8%8B%E6%80%8E%E4%B9%88%E5%AE%89%E6%8E%92">中小学生学编程怎么安排</a> — 按年龄分段指南</li>
+<li><a href="#%E8%A6%81%E4%B8%8D%E8%A6%81%E6%89%BE%E4%BA%BA%E5%B8%A6">要不要找人带</a> — 找一段时间，不长期依赖</li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98">常见问题</a> — 数学不好？英语不好？多大开始学？</li>
+<li><a href="#%E6%97%B6%E9%97%B4%E8%A7%84%E5%88%92">时间规划</a> — 从零到做项目要多久</li>
+<li><a href="#%E5%AD%A6%E5%AE%8C%E4%B9%8B%E5%90%8E%E5%BE%80%E5%93%AA%E8%B5%B0">学完之后往哪走</a> — 五个方向对比</li>
+<li><a href="#%E6%8E%A8%E8%8D%90%E8%B5%84%E6%BA%90%E6%B1%87%E6%80%BB">推荐资源汇总</a> — 免费和付费资源</li>
+<li><a href="#%E6%9C%80%E5%90%8E%E5%87%A0%E5%8F%A5%E5%A4%A7%E5%AE%9E%E8%AF%9D">最后几句大实话</a> — 5条最重要的建议</li>
+</ul>
+<hr>
+<h2 id="先搞清楚一件事：2026年学编程跟以前不一样了"><a href="#先搞清楚一件事：2026年学编程跟以前不一样了" class="headerlink" title="先搞清楚一件事：2026年学编程跟以前不一样了"></a>先搞清楚一件事：2026年学编程跟以前不一样了</h2><p>以前学编程：先啃语法书，再刷算法题，学个三五年才能做出东西。</p>
+<p>现在学编程：AI 能帮你写代码，你负责想清楚要做什么，AI 负责实现。就像你不一定会画图纸，但你能指挥装修队把家装好。</p>
+<p>不是说底层知识不重要，而是——先做出东西，建立信心和兴趣，再回头补底层。这比一上来啃”计算机组成原理”有效一百倍。</p>
+<h2 id="第一步：选一门语言入门"><a href="#第一步：选一门语言入门" class="headerlink" title="第一步：选一门语言入门"></a>第一步：选一门语言入门</h2><p>别纠结选哪个，答案就一个：<strong>Python</strong>。</p>
+<p>原因：</p>
+<ul>
+<li>语法最接近自然语言，读起来像英语句子</li>
+<li>AI 工具对 Python 的支持最好（ChatGPT 写 Python 比 C++ 准确得多）</li>
+<li>数据分析、AI、自动化脚本、网站后端都能用</li>
+<li>免费教程最多</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>语言</th>
+<th>适合场景</th>
+<th>入门难度</th>
+<th>你该不该学</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Python</td>
+<td>万能，AI 首选</td>
+<td>低</td>
+<td>先学这个</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>网页&#x2F;小程序</td>
+<td>中</td>
+<td>Python 学完后学</td>
+</tr>
+<tr>
+<td>Java</td>
+<td>安卓 App&#x2F;后端</td>
+<td>中高</td>
+<td>有明确目标再学</td>
+</tr>
+<tr>
+<td>C++</td>
+<td>游戏&#x2F;系统&#x2F;竞赛</td>
+<td>高</td>
+<td>暂时别碰</td>
+</tr>
+</tbody></table>
+<h2 id="第二步：安装环境（10分钟搞定）"><a href="#第二步：安装环境（10分钟搞定）" class="headerlink" title="第二步：安装环境（10分钟搞定）"></a>第二步：安装环境（10分钟搞定）</h2><p>以前装环境是最劝退的一步，现在有两条路：</p>
+<h3 id="路线-A：在线学（啥都不用装）"><a href="#路线-A：在线学（啥都不用装）" class="headerlink" title="路线 A：在线学（啥都不用装）"></a>路线 A：在线学（啥都不用装）</h3><p>打开浏览器就能写代码的网站，适合纯零基础：</p>
+<ul>
+<li><strong>Replit</strong>（replit.com）：打开网页就能写 Python，不用装任何东西</li>
+<li><strong>Google Colab</strong>（colab.research.google.com）：谷歌提供的，能写 Python + 跑 AI</li>
+<li><strong>freeCodeCamp</strong>（freecodecamp.org）：边学边练，有进度记录</li>
+</ul>
+<h3 id="路线-B：装一个-AI-编程工具"><a href="#路线-B：装一个-AI-编程工具" class="headerlink" title="路线 B：装一个 AI 编程工具"></a>路线 B：装一个 AI 编程工具</h3><p>想认真学的人，直接装一个带 AI 辅助的编辑器：</p>
+<p><strong>入门推荐（免费）：</strong></p>
+<ul>
+<li><strong>Trae</strong>（字节跳动出品）：永久免费，中文界面，自带 AI 助手</li>
+<li><strong>CodeBuddy</strong>（腾讯出品）：免费，集成在 VS Code 里，开箱即用</li>
+<li><strong>Cursor</strong>：最火的 AI 编辑器，有免费额度</li>
+</ul>
+<p><strong>进阶推荐（功能更强）：</strong></p>
+<ul>
+<li><strong>ZCode</strong>：国产 AI 编程工具，支持 Agent 模式，能自动完成多步骤任务</li>
+<li><strong>Codex</strong>（OpenAI 出品）：代码理解和生成能力强，适合复杂项目</li>
+<li><strong>Claude Code</strong>：命令行 AI 编程工具，擅长大型项目重构和自动化</li>
+</ul>
+<p>入门先用 Trae 或 CodeBuddy，等做项目多了想提效，再换 ZCode 或 Claude Code。</p>
+<h2 id="第三步：学-Python-基础（2-4周）"><a href="#第三步：学-Python-基础（2-4周）" class="headerlink" title="第三步：学 Python 基础（2-4周）"></a>第三步：学 Python 基础（2-4周）</h2><p>不用买书，不用报班，按这个顺序学：</p>
+<h3 id="必学的-7-个知识点"><a href="#必学的-7-个知识点" class="headerlink" title="必学的 7 个知识点"></a>必学的 7 个知识点</h3><table>
+<thead>
+<tr>
+<th>顺序</th>
+<th>知识点</th>
+<th>通俗解释</th>
+<th>大概几天</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>变量和数据类型</td>
+<td>给数据起名字，比如 age &#x3D; 18</td>
+<td>2天</td>
+</tr>
+<tr>
+<td>2</td>
+<td>条件判断 if&#x2F;else</td>
+<td>“如果下雨就带伞，否则不带”</td>
+<td>2天</td>
+</tr>
+<tr>
+<td>3</td>
+<td>循环 for&#x2F;while</td>
+<td>重复做一件事，比如数1到100</td>
+<td>3天</td>
+</tr>
+<tr>
+<td>4</td>
+<td>列表和字典</td>
+<td>把一堆数据装在一起，比如购物清单</td>
+<td>3天</td>
+</tr>
+<tr>
+<td>5</td>
+<td>函数</td>
+<td>把一段代码打包，取个名字，反复用</td>
+<td>3天</td>
+</tr>
+<tr>
+<td>6</td>
+<td>文件读写</td>
+<td>让程序能读取和保存文件</td>
+<td>2天</td>
+</tr>
+<tr>
+<td>7</td>
+<td>简单的模块&#x2F;import</td>
+<td>用别人写好的工具，不用自己造轮子</td>
+<td>2天</td>
+</tr>
+</tbody></table>
+<h3 id="怎么学"><a href="#怎么学" class="headerlink" title="怎么学"></a>怎么学</h3><ol>
+<li>B站搜”Python零基础”——找播放量最高的，跟着敲</li>
+<li>边看边敲——光看不练等于没学，每学一个知识点就自己敲一遍</li>
+<li>不懂就问 AI——把代码贴给 ChatGPT&#x2F;Claude，问”这段代码什么意思”</li>
+</ol>
+<p>千万别做的傻事：</p>
+<ul>
+<li>别买《Python编程从入门到精通》那种厚书——看两页就睡着了</li>
+<li>别去刷 LeetCode——那是给有基础的人刷的</li>
+<li>别纠结学 Python 2 还是 3——肯定是 3，2 早就淘汰了</li>
+</ul>
+<h2 id="第四步：学-Prompt-工程——用自然语言指挥-AI"><a href="#第四步：学-Prompt-工程——用自然语言指挥-AI" class="headerlink" title="第四步：学 Prompt 工程——用自然语言指挥 AI"></a>第四步：学 Prompt 工程——用自然语言指挥 AI</h2><p>这是 2026 年最重要的新技能。以前程序员跟计算机交流靠写代码，现在可以靠说人话了。但你得学会怎么说，AI 才能听懂——这就是 Prompt 工程。</p>
+<h3 id="什么是-Prompt"><a href="#什么是-Prompt" class="headerlink" title="什么是 Prompt"></a>什么是 Prompt</h3><p>Prompt 就是你给 AI 的指令。同样一个问题，不同的问法，AI 给的回答质量天差地别。</p>
+<p>差的 Prompt：</p>
+<blockquote>
+<p>“帮我写个程序”</p>
+</blockquote>
+<p>AI 不知道你要什么程序，写出来一个”Hello World”给你。</p>
+<p>好的 Prompt：</p>
+<blockquote>
+<p>“帮我写一个 Python 程序：读取桌面上的 Excel 表格（销售数据.xlsx），统计每个月的销售额总和，然后画一个柱状图保存成图片。表格有’日期’和’金额’两列。”</p>
+</blockquote>
+<p>AI 会直接给你完整能跑的代码。</p>
+<h3 id="写好-Prompt-的-5-个技巧"><a href="#写好-Prompt-的-5-个技巧" class="headerlink" title="写好 Prompt 的 5 个技巧"></a>写好 Prompt 的 5 个技巧</h3><p><strong>1. 把背景说清楚</strong></p>
+<p>别光说”帮我修这段代码”。要说：</p>
+<blockquote>
+<p>“这段代码是用来读取用户输入的年龄，然后判断是否成年。但现在不管输入什么，都显示’未成年’，帮我看看哪里写错了。”</p>
+</blockquote>
+<p>把代码做什么、出了什么问题、期望什么结果都交代清楚。</p>
+<p><strong>2. 分步骤描述</strong></p>
+<p>不要一句话塞太多要求。如果任务复杂，拆成步骤：</p>
+<blockquote>
+<p>“第一步：读取文件。第二步：筛选出金额大于100的记录。第三步：按日期排序。第四步：导出成新文件。”</p>
+</blockquote>
+<p><strong>3. 给例子</strong></p>
+<p>AI 最擅长从例子里学习。与其描述规则，不如给个示例：</p>
+<blockquote>
+<p>“我想把这种数据：’张三,25岁,北京’ 转换成这种格式：{‘姓名’: ‘张三’, ‘年龄’: 25, ‘城市’: ‘北京’}”</p>
+</blockquote>
+<p><strong>4. 说清楚格式要求</strong></p>
+<p>想要什么格式的结果直接说：</p>
+<blockquote>
+<p>“用表格形式输出”、”只给代码不要解释”、”用注释标明每一行的作用”</p>
+</blockquote>
+<p><strong>5. 迭代修正</strong></p>
+<p>第一次的结果不满意很正常。跟 AI 说：</p>
+<blockquote>
+<p>“代码能跑了，但表格太丑了，帮我加个标题和边框”<br>“运行报错了，错误信息是 xxx，帮我看看”</p>
+</blockquote>
+<p>反复几轮就能得到满意的结果。</p>
+<h3 id="三个-AI-工具推荐"><a href="#三个-AI-工具推荐" class="headerlink" title="三个 AI 工具推荐"></a>三个 AI 工具推荐</h3><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>特点</th>
+<th>费用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ChatGPT</td>
+<td>最通用，什么都能问</td>
+<td>免费版够用</td>
+</tr>
+<tr>
+<td>Claude</td>
+<td>写代码最强，代码质量高</td>
+<td>免费版够用</td>
+</tr>
+<tr>
+<td>智谱清言&#x2F;GLM</td>
+<td>国产，中文理解最好，速度快</td>
+<td>免费</td>
+</tr>
+</tbody></table>
+<h2 id="第五步：用-AI-帮你写代码（核心技能）"><a href="#第五步：用-AI-帮你写代码（核心技能）" class="headerlink" title="第五步：用 AI 帮你写代码（核心技能）"></a>第五步：用 AI 帮你写代码（核心技能）</h2><p>这是 2026 年最重要的技能——会用 AI 写代码的人，比纯手写代码的人效率高 5-10 倍。</p>
+<h3 id="怎么用-AI-写代码"><a href="#怎么用-AI-写代码" class="headerlink" title="怎么用 AI 写代码"></a>怎么用 AI 写代码</h3><p>核心就一句话：把你想要的东西用大白话描述清楚，AI 帮你写代码。</p>
+<p>举个例子，你想做一个”计算器”：</p>
+<p>跟 AI 说：</p>
+<blockquote>
+<p>“帮我写一个 Python 计算器，能做加减乘除，运行后在命令行里输入两个数字和运算符，输出结果。”</p>
+</blockquote>
+<p>AI 会直接给你完整的代码。你复制粘贴就能跑。</p>
+<h3 id="但是——你必须能看懂-AI-写的代码"><a href="#但是——你必须能看懂-AI-写的代码" class="headerlink" title="但是——你必须能看懂 AI 写的代码"></a>但是——你必须能看懂 AI 写的代码</h3><p>这是关键：AI 写的代码，你得大致能看懂它在干什么。不然出 bug 了你自己修不了。</p>
+<p>怎么看懂：</p>
+<ol>
+<li>AI 给你代码后，逐行问它”第三行是什么意思”</li>
+<li>自己改一个参数试试，看结果有什么变化</li>
+<li>故意删掉一行，看看程序报什么错——理解每行的作用</li>
+</ol>
+<h3 id="AI-写代码的工作流"><a href="#AI-写代码的工作流" class="headerlink" title="AI 写代码的工作流"></a>AI 写代码的工作流</h3><p>不是一句话就搞定了，实际工作流是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">第一步：描述需求 → AI 生成第一版代码</span><br><span class="line">第二步：你读代码 → 发现不对的地方 → 让 AI 修改</span><br><span class="line">第三步：运行测试 → 报错了 → 把错误信息贴给 AI → AI 修复</span><br><span class="line">第四步：功能跑通了 → 让 AI 优化（加注释、改命名、提升性能）</span><br><span class="line">第五步：自己动手改一些细节 → 加上自己的理解</span><br></pre></td></tr></table></figure>
+
+<p>这个过程里你一直在学——看 AI 写的代码、理解它、修改它。比从零手写学到的东西多得多。</p>
+<h3 id="常见的坑"><a href="#常见的坑" class="headerlink" title="常见的坑"></a>常见的坑</h3><ul>
+<li>AI 写的代码可能有隐藏 bug，尤其是复杂逻辑——必须自己测试</li>
+<li>AI 可能用过时的库或 API——注意看代码引用的库版本</li>
+<li>不要让 AI 帮你写作业或考试——短期有用，长期毁人</li>
+<li>别把公司机密代码贴给 AI——尤其是用免费版的时候</li>
+</ul>
+<h2 id="第六步：做一个完整的小项目（1-2周）"><a href="#第六步：做一个完整的小项目（1-2周）" class="headerlink" title="第六步：做一个完整的小项目（1-2周）"></a>第六步：做一个完整的小项目（1-2周）</h2><p>学完基础后，立刻做一个项目。不要继续看教程了，进入”做中学”模式。</p>
+<h3 id="适合新手的-10-个项目（从易到难）"><a href="#适合新手的-10-个项目（从易到难）" class="headerlink" title="适合新手的 10 个项目（从易到难）"></a>适合新手的 10 个项目（从易到难）</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>用到的知识</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>猜数字游戏</td>
+<td>随机数 + 循环 + 条件</td>
+<td>入门</td>
+</tr>
+<tr>
+<td>简单计算器</td>
+<td>函数 + 输入输出</td>
+<td>入门</td>
+</tr>
+<tr>
+<td>待办事项列表</td>
+<td>列表 + 文件读写</td>
+<td>简单</td>
+</tr>
+<tr>
+<td>天气查询（调API）</td>
+<td>网络请求 + JSON</td>
+<td>简单</td>
+</tr>
+<tr>
+<td>批量重命名文件</td>
+<td>文件操作 + 循环</td>
+<td>简单</td>
+</tr>
+<tr>
+<td>个人记账本</td>
+<td>字典 + 文件存储</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>网页爬虫（抓新闻标题）</td>
+<td>requests + 解析 HTML</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>简单的个人网页</td>
+<td>HTML&#x2F;CSS 基础</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>聊天机器人（调AI接口）</td>
+<td>API 调用 + 字符串处理</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>自动发邮件脚本</td>
+<td>smtplib + 模板</td>
+<td>中等</td>
+</tr>
+</tbody></table>
+<p>选一个你感兴趣的开始做。卡住了就问 AI，但每次问完，确保自己理解了答案。</p>
+<h3 id="做项目的正确姿势"><a href="#做项目的正确姿势" class="headerlink" title="做项目的正确姿势"></a>做项目的正确姿势</h3><ol>
+<li>先自己想：这个项目需要哪些功能？分几步？</li>
+<li>把功能拆小：先做最小可用版本（能跑就行），再加功能</li>
+<li>每完成一个小功能就测试一次，别写一堆再测</li>
+<li>做完后回头看：哪里可以优化？哪里写得不好？</li>
+</ol>
+<h2 id="第七步：了解-AI-是怎么回事（可选）"><a href="#第七步：了解-AI-是怎么回事（可选）" class="headerlink" title="第七步：了解 AI 是怎么回事（可选）"></a>第七步：了解 AI 是怎么回事（可选）</h2><p>如果你对 AI 本身感兴趣（不只是用 AI 写代码，而是想知道 AI 怎么工作的）：</p>
+<h3 id="AI-到底是什么"><a href="#AI-到底是什么" class="headerlink" title="AI 到底是什么"></a>AI 到底是什么</h3><p>用最简单的话说：AI 就是一个读过海量文字的超级大脑。它不会思考，但它会”预测”——你给它一句话，它猜接下来最可能说什么。</p>
+<p>就像手机输入法的联想功能，只不过联想能力强了亿万倍。</p>
+<h3 id="大模型的三个能力"><a href="#大模型的三个能力" class="headerlink" title="大模型的三个能力"></a>大模型的三个能力</h3><table>
+<thead>
+<tr>
+<th>能力</th>
+<th>通俗解释</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>理解</td>
+<td>听懂你说什么</td>
+<td>“帮我总结这篇文章” → 它能看懂文章内容</td>
+</tr>
+<tr>
+<td>生成</td>
+<td>创造新内容</td>
+<td>“帮我写一首诗” → 它能写出通顺的诗</td>
+</tr>
+<tr>
+<td>推理</td>
+<td>解决问题</td>
+<td>“这道数学题怎么解” → 它能给出解题步骤</td>
+</tr>
+</tbody></table>
+<h3 id="入门路线"><a href="#入门路线" class="headerlink" title="入门路线"></a>入门路线</h3><ol>
+<li><strong>吴恩达的 AI 课程</strong>（coursera.org）——最受欢迎的 AI 入门课，免费旁听</li>
+<li><strong>快学 Python 数据分析</strong>——学 pandas 和 numpy 两个库</li>
+<li><strong>玩一玩 ChatGPT API</strong>——自己写代码调用大模型，做一个自己的聊天机器人</li>
+</ol>
+<p>不需要学高数、线代。那些是研究 AI 算法的人需要的。用 AI 的人不需要懂 AI 怎么训练，就像开车的人不需要懂发动机原理。</p>
+<h3 id="大模型的常见用法"><a href="#大模型的常见用法" class="headerlink" title="大模型的常见用法"></a>大模型的常见用法</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>怎么用</th>
+<th>推荐工具</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>写代码</td>
+<td>描述需求，AI 生成代码</td>
+<td>Cursor &#x2F; Claude</td>
+</tr>
+<tr>
+<td>写文章</td>
+<td>给主题和大纲，AI 帮你写</td>
+<td>ChatGPT &#x2F; GLM</td>
+</tr>
+<tr>
+<td>翻译</td>
+<td>贴进去，说”翻译成XX语”</td>
+<td>ChatGPT &#x2F; DeepL</td>
+</tr>
+<tr>
+<td>总结</td>
+<td>贴一篇文章，说”总结要点”</td>
+<td>任意 AI</td>
+</tr>
+<tr>
+<td>数据分析</td>
+<td>给数据，说”帮我分析趋势”</td>
+<td>ChatGPT &#x2F; GLM</td>
+</tr>
+<tr>
+<td>学习辅导</td>
+<td>把不懂的概念贴进去，说”用小学生能懂的话解释”</td>
+<td>任意 AI</td>
+</tr>
+</tbody></table>
+<h2 id="中小学生学编程怎么安排"><a href="#中小学生学编程怎么安排" class="headerlink" title="中小学生学编程怎么安排"></a>中小学生学编程怎么安排</h2><p>编程教育已经越来越低龄化。但不同年龄段方法完全不同，关键是别逼、别焦虑。</p>
+<h3 id="按年龄分段"><a href="#按年龄分段" class="headerlink" title="按年龄分段"></a>按年龄分段</h3><p><strong>6-9 岁：图形化编程（Scratch）</strong></p>
+<p>不写代码，拖积木块就能做动画、小游戏。MIT（麻省理工）专门为小朋友设计的。</p>
+<ul>
+<li>工具：Scratch（scratch.mit.edu，免费，网页版）</li>
+<li>目标：培养逻辑思维，理解”如果…就…”的条件概念</li>
+<li>时间：每周 1-2 小时，玩着学</li>
+<li>注意：别报班，网上免费教程够用了。孩子如果没兴趣，别硬逼，过半年再试试</li>
+</ul>
+<p><strong>9-12 岁：过渡到 Python</strong></p>
+<p>从拖积木块过渡到写真正的代码。这个阶段以兴趣为主。</p>
+<ul>
+<li>入门：用 Minecraft 教育版学 Python（边玩游戏边写代码）</li>
+<li>项目：做一个猜数字游戏、画个 Turtle 图形、写个自动回复机器人</li>
+<li>AI 辅助：让孩子用 ChatGPT 学（”帮我解释什么是循环，用一个卖冰淇淋的例子”）</li>
+<li>注意：别让孩子刷算法题，那个阶段应该是好玩</li>
+</ul>
+<p><strong>12 岁以上：可以认真学了</strong></p>
+<p>如果孩子有兴趣，可以开始系统学。两个方向选一个：</p>
+<ul>
+<li>方向一：Python + 数据分析 &#x2F; AI（实用，以后干啥都能用）</li>
+<li>方向二：C++ + 信息学奥赛（走竞赛路线，对升学有帮助）</li>
+</ul>
+<h3 id="信息学奥赛值不值得搞"><a href="#信息学奥赛值不值得搞" class="headerlink" title="信息学奥赛值不值得搞"></a>信息学奥赛值不值得搞</h3><p>说实话：如果孩子有兴趣且学有余力，可以试。但如果为了升学硬学，痛苦且效果不好。</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>适合</td>
+<td>喜欢数学、逻辑思维强、能坐住的孩子</td>
+</tr>
+<tr>
+<td>收益</td>
+<td>省一以上对自主招生&#x2F;强基计划有帮助</td>
+</tr>
+<tr>
+<td>代价</td>
+<td>至少 2 年系统训练，每周 10+ 小时</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>C++ 语言 +洛谷（luogu.com.cn）刷题</td>
+</tr>
+<tr>
+<td>注意</td>
+<td>没兴趣别硬学，编程焦虑比数学焦虑更伤人</td>
+</tr>
+</tbody></table>
+<h3 id="家长最容易犯的错"><a href="#家长最容易犯的错" class="headerlink" title="家长最容易犯的错"></a>家长最容易犯的错</h3><ol>
+<li><strong>过早逼孩子学代码</strong>——6 岁学 Python 纯属折磨，先玩 Scratch</li>
+<li><strong>报贵的培训班</strong>——每年花一两万学少儿编程，效果不如 B 站免费教程</li>
+<li><strong>追求考级&#x2F;证书</strong>——编程等级考试对升学帮助很小，别被机构忽悠</li>
+<li><strong>忽视兴趣</strong>——编程的核心驱动力是”我能做出东西”的成就感，不是考试分数</li>
+<li><strong>自己不懂就不敢教</strong>——你不需要会编程，跟孩子一起学就行，AI 能帮你们俩</li>
+</ol>
+<h2 id="要不要找人带"><a href="#要不要找人带" class="headerlink" title="要不要找人带"></a>要不要找人带</h2><p>如果你想少走弯路，可以找一个有经验的人带你一段时间。注意是”一段时间”，不是长期依赖。</p>
+<p>找人带的好处：</p>
+<ul>
+<li>遇到卡住的问题，有人帮你点一下，比自己在那死磕两天强</li>
+<li>学什么、先学什么后学什么，有人帮你排好路线</li>
+<li>做项目的时候，有人帮你看代码哪里写得不好</li>
+</ul>
+<p>但不要长期依赖。找人带的目标是”学会自学”，不是”永远有人帮你写”。一般带个一两个月，你掌握了学习方法和解决问题的思路，就可以自己走了。</p>
+<p>去哪找人：</p>
+<ul>
+<li>身边会编程的朋友&#x2F;同事（最靠谱）</li>
+<li>编程社区（掘金、V2EX、GitHub 讨论）</li>
+<li>AI 本身就是最好的”导师”——把问题问清楚，AI 回答得比很多培训班老师还仔细</li>
+</ul>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="“我数学不好能学编程吗？”"><a href="#“我数学不好能学编程吗？”" class="headerlink" title="“我数学不好能学编程吗？”"></a>“我数学不好能学编程吗？”</h3><p>能。90% 的编程工作用到的数学不超过初中水平。加减乘除、百分比、偶尔用个平方根。真正需要高深数学的领域（AI 研究、游戏引擎、密码学）是少数。</p>
+<h3 id="“我英语不好能学编程吗？”"><a href="#“我英语不好能学编程吗？”" class="headerlink" title="“我英语不好能学编程吗？”"></a>“我英语不好能学编程吗？”</h3><p>能。编程语言的关键字就几十个（if、for、while、def、return），用几次就记住了。代码里的变量名你用拼音都行。</p>
+<h3 id="“多大开始学合适？”"><a href="#“多大开始学合适？”" class="headerlink" title="“多大开始学合适？”"></a>“多大开始学合适？”</h3><ul>
+<li>小学高年级（10岁以上）：可以学 Scratch（图形化编程），拖积木块就能做动画和小游戏</li>
+<li>初中：可以开始学 Python，但别逼，兴趣为主</li>
+<li>高中：可以认真学了，参加信息学竞赛或者做一些小项目</li>
+<li>成年人：任何时候开始都不晚，尤其是现在 AI 能帮你写代码</li>
+</ul>
+<h3 id="“要不要报培训班？”"><a href="#“要不要报培训班？”" class="headerlink" title="“要不要报培训班？”"></a>“要不要报培训班？”</h3><p>不建议花大钱报班。网上免费资源足够你学到能找工作的水平。培训班的价值在于”有人盯着你学”和”简历包装”，知识本身免费都能学到。</p>
+<p>如果你需要有人带着学，推荐：</p>
+<ul>
+<li>网易云课堂 &#x2F; 腾讯课堂上的免费 Python 课</li>
+<li>B站系统教程（搜”Python入门”播放量排序）</li>
+<li>freeCodeCamp（中文版，完全免费，有证书）</li>
+</ul>
+<h3 id="“学会编程能干什么？”"><a href="#“学会编程能干什么？”" class="headerlink" title="“学会编程能干什么？”"></a>“学会编程能干什么？”</h3><ul>
+<li>写自动化脚本（批量处理文件、自动填表、数据统计）</li>
+<li>做网站 &#x2F; 小程序 &#x2F; App</li>
+<li>搞数据分析（销售报表、股票分析、爬虫抓数据）</li>
+<li>做 AI 应用（聊天机器人、图片识别、自动翻译）</li>
+<li>找工作（程序员、数据分析师、产品经理懂代码都很吃香）</li>
+<li>辅助学习（用代码验证数学公式、背单词程序、错题本）</li>
+</ul>
+<h2 id="时间规划"><a href="#时间规划" class="headerlink" title="时间规划"></a>时间规划</h2><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>内容</th>
+<th>时间</th>
+<th>每天</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>入门</td>
+<td>Python 基础语法</td>
+<td>2-4 周</td>
+<td>1-2 小时</td>
+</tr>
+<tr>
+<td>进阶</td>
+<td>Prompt 工程 + AI 辅助编程</td>
+<td>1-2 周</td>
+<td>1-2 小时</td>
+</tr>
+<tr>
+<td>实战</td>
+<td>做第一个项目</td>
+<td>1-2 周</td>
+<td>2 小时</td>
+</tr>
+<tr>
+<td>拓展</td>
+<td>学 HTML&#x2F;CSS 或数据库</td>
+<td>2-4 周</td>
+<td>1-2 小时</td>
+</tr>
+<tr>
+<td>深入</td>
+<td>选方向深入（Web&#x2F;数据&#x2F;AI）</td>
+<td>持续</td>
+<td>持续</td>
+</tr>
+</tbody></table>
+<p>从零到能独立做一个小项目，认真学的话 1-2 个月就行。</p>
+<h2 id="学完之后往哪走"><a href="#学完之后往哪走" class="headerlink" title="学完之后往哪走"></a>学完之后往哪走</h2><p>学完 Python 基础和 AI 辅助编程后，你面临一个选择：往哪个方向深入？</p>
+<h3 id="五个方向对比"><a href="#五个方向对比" class="headerlink" title="五个方向对比"></a>五个方向对比</h3><table>
+<thead>
+<tr>
+<th>方向</th>
+<th>做什么</th>
+<th>学习内容</th>
+<th>就业前景</th>
+<th>入门难度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Web 开发</td>
+<td>做网站&#x2F;小程序</td>
+<td>HTML+CSS+JavaScript+后端框架</td>
+<td>需求最大</td>
+<td>中</td>
+</tr>
+<tr>
+<td>数据分析</td>
+<td>处理数据、做报表</td>
+<td>pandas+SQL+可视化</td>
+<td>很好</td>
+<td>低</td>
+</tr>
+<tr>
+<td>AI 应用</td>
+<td>做聊天机器人&#x2F;智能助手</td>
+<td>API 调用+Prompt 工程</td>
+<td>最热</td>
+<td>低</td>
+</tr>
+<tr>
+<td>自动化</td>
+<td>写脚本提升效率</td>
+<td>Python+selenium+各种库</td>
+<td>转行加分</td>
+<td>低</td>
+</tr>
+<tr>
+<td>App 开发</td>
+<td>做手机应用</td>
+<td>Flutter&#x2F;React Native</td>
+<td>好</td>
+<td>中高</td>
+</tr>
+</tbody></table>
+<p>如果不确定选哪个，<strong>先学数据分析或 AI 应用</strong>——门槛最低，做完能直接看到效果，而且跟 Python 基础衔接最紧密。</p>
+<h3 id="每个方向的第一个项目建议"><a href="#每个方向的第一个项目建议" class="headerlink" title="每个方向的第一个项目建议"></a>每个方向的第一个项目建议</h3><p><strong>Web 开发</strong>：做一个个人博客网站（Flask + 几个页面）<br><strong>数据分析</strong>：分析自己的支付宝&#x2F;微信账单（pandas + 图表）<br><strong>AI 应用</strong>：做一个专属聊天机器人（调 ChatGPT API）<br><strong>自动化</strong>：自动整理桌面文件（按类型分类到文件夹）<br><strong>App 开发</strong>：做一个待办清单 App（Flutter + 本地存储）</p>
+<h2 id="推荐资源汇总"><a href="#推荐资源汇总" class="headerlink" title="推荐资源汇总"></a>推荐资源汇总</h2><h3 id="免费"><a href="#免费" class="headerlink" title="免费"></a>免费</h3><table>
+<thead>
+<tr>
+<th>资源</th>
+<th>类型</th>
+<th>适合</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>B站 Python 教程</td>
+<td>视频</td>
+<td>跟着敲</td>
+</tr>
+<tr>
+<td>freeCodeCamp 中文</td>
+<td>交互式</td>
+<td>边学边练</td>
+</tr>
+<tr>
+<td>Replit</td>
+<td>在线编辑器</td>
+<td>不用装环境</td>
+</tr>
+<tr>
+<td>Trae &#x2F; CodeBuddy</td>
+<td>AI 编辑器</td>
+<td>永久免费</td>
+</tr>
+<tr>
+<td>ChatGPT &#x2F; Claude</td>
+<td>AI 助手</td>
+<td>问问题、写代码</td>
+</tr>
+<tr>
+<td>吴恩达 AI 课</td>
+<td>课程</td>
+<td>了解 AI 原理</td>
+</tr>
+<tr>
+<td>菜鸟教程</td>
+<td>文字教程</td>
+<td>查语法速查</td>
+</tr>
+<tr>
+<td>提示工程指南</td>
+<td>文字</td>
+<td>promptingguide.ai&#x2F;zh</td>
+</tr>
+<tr>
+<td>Scratch 官网</td>
+<td>图形化</td>
+<td>6-9 岁</td>
+</tr>
+</tbody></table>
+<h3 id="花小钱（可选）"><a href="#花小钱（可选）" class="headerlink" title="花小钱（可选）"></a>花小钱（可选）</h3><table>
+<thead>
+<tr>
+<th>资源</th>
+<th>费用</th>
+<th>值不值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cursor Pro</td>
+<td>$20&#x2F;月</td>
+<td>如果天天用，值</td>
+</tr>
+<tr>
+<td>GitHub Copilot</td>
+<td>$10&#x2F;月</td>
+<td>有学生免费额度</td>
+</tr>
+<tr>
+<td>Coursera 证书</td>
+<td>$49&#x2F;月</td>
+<td>有免费旁听选项</td>
+</tr>
+</tbody></table>
+<h2 id="最后几句大实话"><a href="#最后几句大实话" class="headerlink" title="最后几句大实话"></a>最后几句大实话</h2><ol>
+<li><p>学编程最难的从来不是语法，是”坚持”。80% 的人在第二周放弃，不是因为难，是因为没看到成果。所以——尽早做出一个能跑的东西，哪怕只是个猜数字游戏。</p>
+</li>
+<li><p>AI 不会取代程序员，但会用 AI 的程序员会取代不会用的。学会用 AI 写代码，是 2026 年最值得投入时间的技能。</p>
+</li>
+<li><p>别追求”学全”。编程领域太大了，没人能全学完。选一个方向（网页、数据、自动化、App），深入做下去就够了。</p>
+</li>
+<li><p>最好的学习方式是做真实项目。帮朋友做个网站、给自己写个记账程序、给孩子做个背单词工具——有真实需求驱动，比任何教程都有效。</p>
+</li>
+<li><p>遇到问题先搜再问。90% 的问题别人遇到过，搜一下就有答案。实在搜不到再问 AI，问的时候把问题描述清楚（报错信息贴完整）。</p>
+</li>
+</ol>
+
+  </div>
+
+  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+  <section class="follow-card">
+    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+    <div class="follow-grid">
+      <div class="follow-block">
+        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+        <div class="follow-text">
+          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+        </div>
+      </div>
+      <div class="follow-block">
+        <div class="follow-text">
+          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+  </section>
+
+  <nav class="post-nav">
+    <a class="post-nav__prev" href="/2026/07/28/aosp-build-systemui/">← 在 Apple Silicon Mac 上编译 AOSP SystemUI：59 分钟从零到 APK</a>
+    <a class="post-nav__next" href="/2026/07/28/aosp-get-source/">在 macOS 上获取 Android 16 源码：从零到 196GB 完整拉取 →</a>
+  </nav>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 豆奶与程序猫 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 · 托管于 GitHub Pages</p>
+      <p class="footer-social">
+        <a href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">📕 小红书：豆奶与程序猫</a>
+        <span>·</span>
+        <a href="https://github.com/soycodetrail" target="_blank" rel="noopener">💻 GitHub</a>
+        <span>·</span>
+        <a href="/atom.xml" target="_blank" rel="noopener">📰 RSS</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

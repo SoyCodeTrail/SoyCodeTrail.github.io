@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flutter 多端开发实战：一套代码怎么编译发布到 Android / iOS / macOS / Windows / Linux / Web | 豆奶与程序猫的技术博客</title>
+  <meta name="description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta name="author" content="豆奶与程序猫">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Flutter 多端开发实战：一套代码怎么编译发布到 Android / iOS / macOS / Windows / Linux / Web">
+  <meta property="og:description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta property="og:url" content="https://soycodetrail.github.io/2026/07/28/flutter-multiplatform/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
+  <link rel="sitemap" href="/sitemap.xml" type="application/xml">
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
+      <nav class="site-nav">
+        <a href="/">首页</a>
+        <a href="/archives">归档</a>
+        <a href="/tags">标签</a>
+        <a href="/about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container site-main">
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">Flutter 多端开发实战：一套代码怎么编译发布到 Android / iOS / macOS / Windows / Linux / Web</h1>
+    <div class="post-meta">
+      <span>📅 2026-07-28</span>
+      
+      <span>⏱️ 18分钟</span>
+      
+    </div>
+    <div class="post-tags">
+      
+        <a class="tag" href="/tags/%E7%BC%96%E8%AF%91/">#编译</a>
+      
+        <a class="tag" href="/tags/Flutter/">#Flutter</a>
+      
+        <a class="tag" href="/tags/%E5%A4%9A%E5%B9%B3%E5%8F%B0/">#多平台</a>
+      
+        <a class="tag" href="/tags/%E5%8F%91%E5%B8%83/">#发布</a>
+      
+        <a class="tag" href="/tags/CI-CD/">#CI/CD</a>
+      
+    </div>
+  </header>
+
+  <div class="post-content">
+    <h2 id="业界全平台-App-怎么做的"><a href="#业界全平台-App-怎么做的" class="headerlink" title="业界全平台 App 怎么做的"></a>业界全平台 App 怎么做的</h2><p>先说个现实：微信、飞书、Notion、Telegram 这些”全平台 App”，<strong>不是用一种技术覆盖所有平台</strong>，而是分层的：</p>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>业界主流技术</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Android</td>
+<td>原生 Kotlin&#x2F;Java 或 Flutter 或 React Native</td>
+<td>性能和生态</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>原生 Swift 或 Flutter 或 React Native</td>
+<td>Apple 生态封闭</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>原生 C#（WinUI&#x2F;WPF）或 Electron 或 Flutter</td>
+<td>Win32 API</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>原生 Swift 或 Electron 或 Flutter</td>
+<td>Apple 生态</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>原生 C++（GTK&#x2F;Qt）或 Electron 或 Flutter</td>
+<td>开源生态</td>
+</tr>
+</tbody></table>
+<h3 id="“一套代码全平台”的三条路"><a href="#“一套代码全平台”的三条路" class="headerlink" title="“一套代码全平台”的三条路"></a>“一套代码全平台”的三条路</h3><table>
+<thead>
+<tr>
+<th>技术</th>
+<th>能覆盖哪些平台</th>
+<th>谁在用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Flutter</strong></td>
+<td>Android&#x2F;iOS&#x2F;macOS&#x2F;Windows&#x2F;Linux&#x2F;Web（6 端）</td>
+<td>阿里闲鱼、字节抖音部分模块、Google Ads</td>
+</tr>
+<tr>
+<td><strong>React Native</strong></td>
+<td>Android&#x2F;iOS&#x2F;Web（3 端）</td>
+<td>Facebook、Instagram、Discord 移动端</td>
+</tr>
+<tr>
+<td><strong>Electron</strong></td>
+<td>Windows&#x2F;macOS&#x2F;Linux（3 端桌面）</td>
+<td>VSCode、Discord 桌面端、飞书桌面端</td>
+</tr>
+</tbody></table>
+<p><strong>没有一种技术真正覆盖全部 6 端且体验都好</strong>。Flutter 理论上 6 端通吃，但 iOS 需要签名、Windows 需要 Windows 机器。Electron 只做桌面端。RN 只做移动端 + Web。</p>
+<h3 id="大厂实际做法：混合架构"><a href="#大厂实际做法：混合架构" class="headerlink" title="大厂实际做法：混合架构"></a>大厂实际做法：混合架构</h3><p>大多数大厂是<strong>混合方案</strong>——移动端一套、桌面端一套、Web 一套，各自用最优技术：</p>
+<table>
+<thead>
+<tr>
+<th>厂商</th>
+<th>移动端</th>
+<th>桌面端</th>
+<th>Web 端</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>飞书</td>
+<td>Flutter &#x2F; RN</td>
+<td>Electron</td>
+<td>Vue</td>
+</tr>
+<tr>
+<td>微信</td>
+<td>原生（C++核心）</td>
+<td>原生 C++</td>
+<td>原生</td>
+</tr>
+<tr>
+<td>Discord</td>
+<td>React Native</td>
+<td>Electron</td>
+<td>React</td>
+</tr>
+<tr>
+<td>Notion</td>
+<td>React Native</td>
+<td>Electron</td>
+<td>React</td>
+</tr>
+</tbody></table>
+<p>个人开发者没必要这么复杂。Flutter 一个人写一套就能覆盖 Android + Web + macOS，够用了。</p>
+<h3 id="Release-页面怎么做到全平台的"><a href="#Release-页面怎么做到全平台的" class="headerlink" title="Release 页面怎么做到全平台的"></a>Release 页面怎么做到全平台的</h3><p>你在 GitHub 上看到的那种”每个平台都有安装包”的 Release 页，<strong>确实是在对应系统上编译出来的</strong>。没有跨平台交叉编译。</p>
+<p>业界标准流程是 <strong>GitHub Actions CI&#x2F;CD</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">开发者打 tag（如 v1.5.0）推到 GitHub</span><br><span class="line">           ↓</span><br><span class="line">GitHub Actions 自动触发（3 台云服务器并行）</span><br><span class="line">    ┌─────────────────────────────┐</span><br><span class="line">    │ ubuntu-latest              │ → Android APK + Linux + Web</span><br><span class="line">    │ macos-latest               │ → iOS + macOS</span><br><span class="line">    │ windows-latest             │ → Windows</span><br><span class="line">    └─────────────────────────────┘</span><br><span class="line">           ↓</span><br><span class="line">5 个平台的安装包自动上传到 Release 页面</span><br></pre></td></tr></table></figure>
+
+<p><strong>公开仓库完全免费</strong>，私有仓库每月 2000 分钟免费额度。每次构建约 15 分钟 × 5 平台 &#x3D; 75 分钟，每月能构建 26 次。</p>
+<h2 id="Flutter-凭什么一套代码跑六端"><a href="#Flutter-凭什么一套代码跑六端" class="headerlink" title="Flutter 凭什么一套代码跑六端"></a>Flutter 凭什么一套代码跑六端</h2><p>Flutter 写一份 Dart 代码，编译出 6 个平台的原生产物。靠的是每个平台有一个嵌入层（embedding layer），负责把 Flutter 引擎和 UI 代码跑在对应平台上。</p>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>编译产物</th>
+<th>用户怎么装</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Android</td>
+<td>.apk</td>
+<td>直接安装</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>.ipa</td>
+<td>Xcode 签名 &#x2F; TestFlight</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>.app</td>
+<td>拖入应用程序文件夹</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>.exe + .dll</td>
+<td>双击安装</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>可执行文件</td>
+<td>解压运行</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>JS + HTML</td>
+<td>部署到 Nginx</td>
+</tr>
+</tbody></table>
+<p>不需要改一行代码，6 个平台都能跑。但——<strong>不是所有平台都能在一台 Mac 上编译</strong>。</p>
+<h2 id="哪些平台能在-Mac-上编译"><a href="#哪些平台能在-Mac-上编译" class="headerlink" title="哪些平台能在 Mac 上编译"></a>哪些平台能在 Mac 上编译</h2><p>每个平台需要对应的系统环境和工具链。Mac 上没有 Windows SDK，也没有 Linux 的 GTK 库。</p>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>Mac 能编译吗</th>
+<th>额外需要什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Android</td>
+<td>能</td>
+<td>Android SDK + JDK</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>能</td>
+<td>Xcode + CocoaPods</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>能</td>
+<td>Xcode</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>能</td>
+<td>Flutter SDK 自带</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>不能</td>
+<td>需要 Windows + Visual Studio</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>不能</td>
+<td>需要 Linux + GTK&#x2F;CMake</td>
+</tr>
+</tbody></table>
+<p>Mac 覆盖 4 个平台。剩下两个得在对应系统上编译——或者用 GitHub Actions 云端编译。</p>
+<h2 id="各平台编译命令"><a href="#各平台编译命令" class="headerlink" title="各平台编译命令"></a>各平台编译命令</h2><h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 调试版（体积大，带日志）</span></span><br><span class="line">flutter build apk --debug</span><br><span class="line"></span><br><span class="line"><span class="comment"># 发布版（体积小，需签名）</span></span><br><span class="line">flutter build apk --release</span><br><span class="line"></span><br><span class="line"><span class="comment"># Google Play 上架用的 AAB</span></span><br><span class="line">flutter build appbundle --release</span><br></pre></td></tr></table></figure>
+
+<p>产物在 <code>build/app/outputs/flutter-apk/app-release.apk</code>。</p>
+<h3 id="iOS"><a href="#iOS" class="headerlink" title="iOS"></a>iOS</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不签名（只能模拟器跑）</span></span><br><span class="line">flutter build ios --release --no-codesign</span><br><span class="line"></span><br><span class="line"><span class="comment"># 完整签名（需要 Apple Developer 账号 $99/年）</span></span><br><span class="line">flutter build ipa --release</span><br></pre></td></tr></table></figure>
+
+<p>没签名证书，编出来的包装不到真机上。这是 Apple 的生态封闭决定的，绕不过去。</p>
+<h3 id="macOS"><a href="#macOS" class="headerlink" title="macOS"></a>macOS</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter build macos --release</span><br></pre></td></tr></table></figure>
+
+<p>产物在 <code>build/macos/Build/Products/Release/你的App名.app</code>。</p>
+<h3 id="Web"><a href="#Web" class="headerlink" title="Web"></a>Web</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter build web --release</span><br></pre></td></tr></table></figure>
+
+<p>产物在 <code>build/web/</code>，整个目录上传到任意 Web 服务器就能访问。</p>
+<h3 id="Windows（在-Windows-机器上）"><a href="#Windows（在-Windows-机器上）" class="headerlink" title="Windows（在 Windows 机器上）"></a>Windows（在 Windows 机器上）</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter build windows --release</span><br></pre></td></tr></table></figure>
+
+<h3 id="Linux（在-Linux-机器上）"><a href="#Linux（在-Linux-机器上）" class="headerlink" title="Linux（在 Linux 机器上）"></a>Linux（在 Linux 机器上）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter build linux --release</span><br></pre></td></tr></table></figure>
+
+<h2 id="怎么安装到设备上"><a href="#怎么安装到设备上" class="headerlink" title="怎么安装到设备上"></a>怎么安装到设备上</h2><h3 id="Android-手机"><a href="#Android-手机" class="headerlink" title="Android 手机"></a>Android 手机</h3><p>USB 连接手机，打开 USB 调试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">adb devices                    <span class="comment"># 确认连上了</span></span><br><span class="line">adb install -r app-release.apk <span class="comment"># 安装</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="iOS-手机"><a href="#iOS-手机" class="headerlink" title="iOS 手机"></a>iOS 手机</h3><p>两条路：</p>
+<ul>
+<li><strong>Xcode 直接装</strong>：数据线连 Xcode → 选设备 → Run（要 Developer 账号）</li>
+<li><strong>TestFlight</strong>：打包上传 App Store Connect → 邀请测试用户</li>
+</ul>
+<h3 id="macOS-电脑"><a href="#macOS-电脑" class="headerlink" title="macOS 电脑"></a>macOS 电脑</h3><p>把 <code>.app</code> 拖入 <code>/Applications</code>。第一次打开可能提示”无法验证开发者”，去 <strong>系统设置 → 隐私与安全性 → 仍要打开</strong>。</p>
+<h3 id="Web-部署"><a href="#Web-部署" class="headerlink" title="Web 部署"></a>Web 部署</h3><p>把 <code>build/web/</code> 上传到 Nginx：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r build/web/* server:/var/www/myapp/</span><br></pre></td></tr></table></figure>
+
+<p>Nginx 加一行 SPA 路由兜底：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">location</span> / &#123;</span><br><span class="line">    <span class="attribute">try_files</span> <span class="variable">$uri</span> <span class="variable">$uri</span>/ /index.html;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="怎么发布让用户下载"><a href="#怎么发布让用户下载" class="headerlink" title="怎么发布让用户下载"></a>怎么发布让用户下载</h2><h3 id="手动发布"><a href="#手动发布" class="headerlink" title="手动发布"></a>手动发布</h3><p>本地编译完，用 gh CLI 上传到 GitHub Release：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gh release create v1.0.0 \</span><br><span class="line">  build/app/outputs/flutter-apk/app-release.apk \</span><br><span class="line">  --title <span class="string">&quot;v1.0.0&quot;</span> --notes <span class="string">&quot;更新说明&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="自动发布（GitHub-Actions）"><a href="#自动发布（GitHub-Actions）" class="headerlink" title="自动发布（GitHub Actions）"></a>自动发布（GitHub Actions）</h3><p>这是业界标准做法。配一个 <code>.github/workflows/release.yml</code>，打 tag 就自动在云端编译 5 个平台。</p>
+<p>GitHub 提供 Ubuntu&#x2F;Mac&#x2F;Windows 三种云服务器，代码 push 后并行编译，产物自动上传到 Release。</p>
+<p>以后发版只需要：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git tag v1.5.0</span><br><span class="line">git push origin v1.5.0</span><br><span class="line"><span class="comment"># GitHub 自动编译 5 个平台，产物自动上传到 Release</span></span><br></pre></td></tr></table></figure>
+
+<p>公开仓库完全免费。</p>
+<h2 id="编译踩坑实录"><a href="#编译踩坑实录" class="headerlink" title="编译踩坑实录"></a>编译踩坑实录</h2><h3 id="IconData-tree-shake-报错"><a href="#IconData-tree-shake-报错" class="headerlink" title="IconData tree-shake 报错"></a>IconData tree-shake 报错</h3><p>如果代码里用 Map 查找 IconData（比如按科目名动态取图标），Flutter Web&#x2F;macOS 编译会报 <code>Avoid non-constant invocations of IconData</code>。</p>
+<p>加一个参数解决：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">flutter build apk --release --no-tree-shake-icons</span><br><span class="line">flutter build web --release --no-tree-shake-icons</span><br></pre></td></tr></table></figure>
+
+<h3 id="pub-get-网络失败"><a href="#pub-get-网络失败" class="headerlink" title="pub get 网络失败"></a>pub get 网络失败</h3><p>代理冲突。清除代理变量：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">env</span> -u http_proxy -u https_proxy -u all_proxy flutter pub get</span><br></pre></td></tr></table></figure>
+
+<h3 id="Android-release-签名失败"><a href="#Android-release-签名失败" class="headerlink" title="Android release 签名失败"></a>Android release 签名失败</h3><p>需要生成 keystore：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">keytool -genkey -v -keystore ~/keystore.jks \</span><br><span class="line">  -keyalg RSA -keysize 2048 -validity 10000 -<span class="built_in">alias</span> release</span><br></pre></td></tr></table></figure>
+
+<p>配到 <code>android/key.properties</code> + <code>android/app/build.gradle</code>。</p>
+<h3 id="iOS-编译需要-CocoaPods"><a href="#iOS-编译需要-CocoaPods" class="headerlink" title="iOS 编译需要 CocoaPods"></a>iOS 编译需要 CocoaPods</h3><p>Mac 上没装会报错：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> gem install cocoapods</span><br></pre></td></tr></table></figure>
+
+<h2 id="版本号怎么管"><a href="#版本号怎么管" class="headerlink" title="版本号怎么管"></a>版本号怎么管</h2><p><code>pubspec.yaml</code> 里 <code>version: 1.4.0+2</code>：</p>
+<ul>
+<li><code>1.4.0</code> 是用户看到的版本名</li>
+<li><code>+2</code> 是内部构建号，每次发布递增</li>
+</ul>
+<p>语义化版本：加功能升中间段（1.4→1.5），修 Bug 升最后段（1.4.0→1.4.1），大改升第一段（1.x→2.0）。</p>
+<h2 id="个人开发者最省钱的发布路径"><a href="#个人开发者最省钱的发布路径" class="headerlink" title="个人开发者最省钱的发布路径"></a>个人开发者最省钱的发布路径</h2><table>
+<thead>
+<tr>
+<th>平台</th>
+<th>免费方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Android</td>
+<td>APK 放 GitHub Release &#x2F; 自己的网站</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>部署到自己的 Nginx</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>.app 打 zip 放 GitHub Release</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>找台 Windows 编完放 GitHub Release</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>$99&#x2F;年 Apple Developer，绕不过去</td>
+</tr>
+</tbody></table>
+<p>不花一分上架费，GitHub Release + 自己的服务器就够了。</p>
+
+  </div>
+
+  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+  <section class="follow-card">
+    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+    <div class="follow-grid">
+      <div class="follow-block">
+        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+        <div class="follow-text">
+          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+        </div>
+      </div>
+      <div class="follow-block">
+        <div class="follow-text">
+          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+  </section>
+
+  <nav class="post-nav">
+    <a class="post-nav__prev" href="/2026/07/28/flutter-full-stack-guide/">← 一套 Flutter 代码发布到全平台：从拍照 App 到多端发布的完整实战</a>
+    <a class="post-nav__next" href="/2026/07/28/java-backend-intro/">Java 后端开发入门：从 Spring Boot 到微服务架构 →</a>
+  </nav>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 豆奶与程序猫 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 · 托管于 GitHub Pages</p>
+      <p class="footer-social">
+        <a href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">📕 小红书：豆奶与程序猫</a>
+        <span>·</span>
+        <a href="https://github.com/soycodetrail" target="_blank" rel="noopener">💻 GitHub</a>
+        <span>·</span>
+        <a href="/atom.xml" target="_blank" rel="noopener">📰 RSS</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

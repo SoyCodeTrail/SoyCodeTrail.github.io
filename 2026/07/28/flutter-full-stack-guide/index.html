@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一套 Flutter 代码发布到全平台：从拍照 App 到多端发布的完整实战 | 豆奶与程序猫的技术博客</title>
+  <meta name="description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta name="author" content="豆奶与程序猫">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="一套 Flutter 代码发布到全平台：从拍照 App 到多端发布的完整实战">
+  <meta property="og:description" content="豆奶与程序猫的技术博客，分享 Android 系统开发、Flutter、Vue、AI 编程等实战经验与学习路线。微信 Yishisiweikongjian，小红书 豆奶与程序猫。">
+  <meta property="og:url" content="https://soycodetrail.github.io/2026/07/28/flutter-full-stack-guide/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
+  <link rel="sitemap" href="/sitemap.xml" type="application/xml">
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
+      <nav class="site-nav">
+        <a href="/">首页</a>
+        <a href="/archives">归档</a>
+        <a href="/tags">标签</a>
+        <a href="/about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container site-main">
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">一套 Flutter 代码发布到全平台：从拍照 App 到多端发布的完整实战</h1>
+    <div class="post-meta">
+      <span>📅 2026-07-28</span>
+      
+      <span>⏱️ 25分钟</span>
+      
+    </div>
+    <div class="post-tags">
+      
+        <a class="tag" href="/tags/Flutter/">#Flutter</a>
+      
+        <a class="tag" href="/tags/%E5%A4%9A%E5%B9%B3%E5%8F%B0/">#多平台</a>
+      
+        <a class="tag" href="/tags/%E5%8F%91%E5%B8%83/">#发布</a>
+      
+        <a class="tag" href="/tags/CI-CD/">#CI/CD</a>
+      
+        <a class="tag" href="/tags/%E5%AE%9E%E6%88%98/">#实战</a>
+      
+    </div>
+  </header>
+
+  <div class="post-content">
+    <p>上一篇讲了个人网站怎么用 Vue3 + Supabase + Nginx 搭起来。这次讲移动端——一套 Flutter 代码，怎么从零做到 Android + Web + macOS 三端发布，全程可以让 AI 帮你干活。</p>
+<h2 id="你可以直接把下面这段话甩给-AI"><a href="#你可以直接把下面这段话甩给-AI" class="headerlink" title="你可以直接把下面这段话甩给 AI"></a>你可以直接把下面这段话甩给 AI</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">我要做一个 App，主要实现：拍照采集、AI 识别、分类管理、PDF 打印导出。</span><br><span class="line">参考下面的技术栈和步骤：</span><br><span class="line"></span><br><span class="line">Flutter 3.44 + Dart + GLM-4V 视觉识别 + Provider 状态管理</span><br><span class="line"></span><br><span class="line">8 个步骤：</span><br><span class="line">环境准备 → 项目创建 → 核心功能开发 → AI 接入 → PDF 导出 → </span><br><span class="line">编译调试 → 多平台构建 → GitHub Release 发布</span><br><span class="line"></span><br><span class="line">仿照以下技术栈：</span><br><span class="line">- 框架：Flutter（一套代码编 Android/iOS/macOS/Windows/Linux/Web）</span><br><span class="line">- AI：智谱 GLM-4V（图片识别）+ GLM-4-Flash（文本解析，免费）</span><br><span class="line">- 存储：shared_preferences（本地 JSON）</span><br><span class="line">- PDF：pdf + printing 包</span><br><span class="line">- 拍照：image_picker</span><br><span class="line">- 状态：Provider</span><br><span class="line">- 发布：GitHub Actions 自动构建 5 个平台</span><br></pre></td></tr></table></figure>
+
+<h2 id="第一步：环境准备"><a href="#第一步：环境准备" class="headerlink" title="第一步：环境准备"></a>第一步：环境准备</h2><h3 id="装-Flutter"><a href="#装-Flutter" class="headerlink" title="装 Flutter"></a>装 Flutter</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Mac（推荐用 fvm 管理版本）</span></span><br><span class="line">brew install fvm</span><br><span class="line">fvm install 3.44.4</span><br><span class="line">fvm use 3.44.4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或直接下载</span></span><br><span class="line"><span class="comment"># https://docs.flutter.dev/get-started/install</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="检查环境"><a href="#检查环境" class="headerlink" title="检查环境"></a>检查环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter doctor</span><br></pre></td></tr></table></figure>
+
+<p>需要全绿（或至少 Android 和 Web 绿）：</p>
+<ul>
+<li>Flutter SDK ✅</li>
+<li>Android SDK ✅（装 Android Studio 自带）</li>
+<li>Chrome（Web 构建用）✅</li>
+<li>Xcode（iOS&#x2F;macOS 构建，只 Mac 需要）✅</li>
+</ul>
+<h3 id="代理问题"><a href="#代理问题" class="headerlink" title="代理问题"></a>代理问题</h3><p>国内网络环境下 pub get 可能失败。清除代理：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">env</span> -u http_proxy -u https_proxy -u all_proxy \</span><br><span class="line">  flutter pub get</span><br></pre></td></tr></table></figure>
+
+<h2 id="第二步：创建项目"><a href="#第二步：创建项目" class="headerlink" title="第二步：创建项目"></a>第二步：创建项目</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">flutter create --org com.yourname --project-name my_app my_app</span><br><span class="line"><span class="built_in">cd</span> my_app</span><br></pre></td></tr></table></figure>
+
+<h3 id="核心依赖（pubspec-yaml）"><a href="#核心依赖（pubspec-yaml）" class="headerlink" title="核心依赖（pubspec.yaml）"></a>核心依赖（pubspec.yaml）</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">dependencies:</span></span><br><span class="line">  <span class="attr">flutter:</span></span><br><span class="line">    <span class="attr">sdk:</span> <span class="string">flutter</span></span><br><span class="line">  <span class="attr">http:</span> <span class="string">^1.2.0</span>              <span class="comment"># 网络（调 AI API）</span></span><br><span class="line">  <span class="attr">image_picker:</span> <span class="string">^1.1.0</span>      <span class="comment"># 拍照/相册</span></span><br><span class="line">  <span class="attr">provider:</span> <span class="string">^6.1.0</span>          <span class="comment"># 状态管理</span></span><br><span class="line">  <span class="attr">shared_preferences:</span> <span class="string">^2.3.0</span> <span class="comment"># 本地存储</span></span><br><span class="line">  <span class="attr">pdf:</span> <span class="string">^3.11.0</span>              <span class="comment"># PDF 生成</span></span><br><span class="line">  <span class="attr">printing:</span> <span class="string">^5.14.0</span>         <span class="comment"># PDF 打印/分享</span></span><br><span class="line">  <span class="attr">path_provider:</span> <span class="string">^2.1.0</span>     <span class="comment"># 文件路径</span></span><br><span class="line">  <span class="attr">share_plus:</span> <span class="string">^10.0.0</span>       <span class="comment"># 系统分享</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="项目结构（推荐）"><a href="#项目结构（推荐）" class="headerlink" title="项目结构（推荐）"></a>项目结构（推荐）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">lib/</span><br><span class="line">├── main.dart                 # 入口</span><br><span class="line">├── config.dart               # 常量配置</span><br><span class="line">├── models/                   # 数据模型</span><br><span class="line">│   └── item.dart</span><br><span class="line">├── services/                 # 业务逻辑</span><br><span class="line">│   ├── ai_service.dart       # AI 调用</span><br><span class="line">│   ├── storage_service.dart  # 本地存储</span><br><span class="line">│   └── pdf_service.dart      # PDF 导出</span><br><span class="line">├── providers/                # 状态管理</span><br><span class="line">│   └── item_provider.dart</span><br><span class="line">└── screens/                  # 页面</span><br><span class="line">    ├── home_screen.dart      # 底部导航</span><br><span class="line">    ├── list_screen.dart      # 列表页</span><br><span class="line">    ├── capture_screen.dart   # 拍照页</span><br><span class="line">    ├── detail_screen.dart    # 详情页</span><br><span class="line">    └── settings_screen.dart  # 设置页</span><br></pre></td></tr></table></figure>
+
+<h2 id="第三步：核心功能开发"><a href="#第三步：核心功能开发" class="headerlink" title="第三步：核心功能开发"></a>第三步：核心功能开发</h2><h3 id="拍照采集"><a href="#拍照采集" class="headerlink" title="拍照采集"></a>拍照采集</h3><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package:image_picker/image_picker.dart&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> picker = ImagePicker();</span><br><span class="line"><span class="comment">// 拍照</span></span><br><span class="line"><span class="keyword">final</span> photo = <span class="keyword">await</span> picker.pickImage(source: ImageSource.camera, imageQuality: <span class="number">80</span>);</span><br><span class="line"><span class="comment">// 相册选图</span></span><br><span class="line"><span class="keyword">final</span> photo = <span class="keyword">await</span> picker.pickImage(source: ImageSource.gallery, imageQuality: <span class="number">80</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>imageQuality: 80</code> 压缩图片，避免 base64 编码后太大。</p>
+<h3 id="本地存储（shared-preferences）"><a href="#本地存储（shared-preferences）" class="headerlink" title="本地存储（shared_preferences）"></a>本地存储（shared_preferences）</h3><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 存</span></span><br><span class="line"><span class="keyword">final</span> prefs = <span class="keyword">await</span> SharedPreferences.getInstance();</span><br><span class="line">prefs.setString(<span class="string">&#x27;my_items&#x27;</span>, jsonEncode(items.map((e) =&gt; e.toJson()).toList()));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 取</span></span><br><span class="line"><span class="keyword">final</span> raw = prefs.getString(<span class="string">&#x27;my_items&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span> (raw != <span class="keyword">null</span>) &#123;</span><br><span class="line">  <span class="keyword">final</span> list = jsonDecode(raw) <span class="keyword">as</span> <span class="built_in">List</span>;</span><br><span class="line">  items = list.map((e) =&gt; Item.fromJson(e)).toList();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>轻量级方案，不需要数据库。数据多了（超过 1000 条）再考虑 SQLite 或 Supabase。</p>
+<h3 id="状态管理（Provider）"><a href="#状态管理（Provider）" class="headerlink" title="状态管理（Provider）"></a>状态管理（Provider）</h3><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ItemProvider</span> <span class="keyword">extends</span> <span class="title">ChangeNotifier</span> </span>&#123;</span><br><span class="line">  <span class="built_in">List</span>&lt;Item&gt; _items = [];</span><br><span class="line">  <span class="built_in">List</span>&lt;Item&gt; <span class="keyword">get</span> items =&gt; _items;</span><br><span class="line"></span><br><span class="line">  Future&lt;<span class="keyword">void</span>&gt; loadItems() <span class="keyword">async</span> &#123;</span><br><span class="line">    _items = <span class="keyword">await</span> StorageService.getAllItems();</span><br><span class="line">    notifyListeners();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  Future&lt;<span class="keyword">void</span>&gt; addItem(Item item) <span class="keyword">async</span> &#123;</span><br><span class="line">    _items.add(item);</span><br><span class="line">    <span class="keyword">await</span> StorageService.addItem(item);</span><br><span class="line">    notifyListeners();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>UI 里用 <code>context.watch&lt;ItemProvider&gt;()</code> 自动刷新。</p>
+<h2 id="第四步：AI-接入（双引擎架构）"><a href="#第四步：AI-接入（双引擎架构）" class="headerlink" title="第四步：AI 接入（双引擎架构）"></a>第四步：AI 接入（双引擎架构）</h2><p>拍照识别用视觉模型（GLM-4V），文本解析用纯文本模型（GLM-4-Flash 免费）——两个引擎独立配置。</p>
+<h3 id="图片识别（GLM-4V）"><a href="#图片识别（GLM-4V）" class="headerlink" title="图片识别（GLM-4V）"></a>图片识别（GLM-4V）</h3><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> base64Image = base64Encode(<span class="keyword">await</span> File(imagePath).readAsBytes());</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> response = <span class="keyword">await</span> http.post(</span><br><span class="line">  <span class="built_in">Uri</span>.parse(<span class="string">&#x27;https://open.bigmodel.cn/api/paas/v4/chat/completions&#x27;</span>),</span><br><span class="line">  headers: &#123;</span><br><span class="line">    <span class="string">&#x27;Content-Type&#x27;</span>: <span class="string">&#x27;application/json&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;Authorization&#x27;</span>: <span class="string">&#x27;Bearer <span class="subst">$apiKey</span>&#x27;</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  body: jsonEncode(&#123;</span><br><span class="line">    <span class="string">&#x27;model&#x27;</span>: <span class="string">&#x27;glm-4v&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;messages&#x27;</span>: [&#123;</span><br><span class="line">      <span class="string">&#x27;role&#x27;</span>: <span class="string">&#x27;user&#x27;</span>,</span><br><span class="line">      <span class="string">&#x27;content&#x27;</span>: [</span><br><span class="line">        &#123;<span class="string">&#x27;type&#x27;</span>: <span class="string">&#x27;text&#x27;</span>, <span class="string">&#x27;text&#x27;</span>: <span class="string">&#x27;识别这张图片中的题目，返回JSON：&#123;&quot;question&quot;:&quot;&quot;,&quot;subject&quot;:&quot;&quot;,&quot;difficulty&quot;:&quot;&quot;&#125;&#x27;</span>&#125;,</span><br><span class="line">        &#123;<span class="string">&#x27;type&#x27;</span>: <span class="string">&#x27;image_url&#x27;</span>, <span class="string">&#x27;image_url&#x27;</span>: &#123;<span class="string">&#x27;url&#x27;</span>: <span class="string">&#x27;data:image/jpeg;base64,<span class="subst">$base64Image</span>&#x27;</span>&#125;&#125;,</span><br><span class="line">      ]</span><br><span class="line">    &#125;]</span><br><span class="line">  &#125;),</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>这是 OpenAI 兼容格式——智谱、通义千问、DeepSeek 等国内模型都支持。</p>
+<h3 id="文本解析（GLM-4-Flash，免费）"><a href="#文本解析（GLM-4-Flash，免费）" class="headerlink" title="文本解析（GLM-4-Flash，免费）"></a>文本解析（GLM-4-Flash，免费）</h3><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> response = <span class="keyword">await</span> http.post(</span><br><span class="line">  <span class="built_in">Uri</span>.parse(<span class="string">&#x27;https://open.bigmodel.cn/api/paas/v4/chat/completions&#x27;</span>),</span><br><span class="line">  headers: &#123;<span class="string">&#x27;Authorization&#x27;</span>: <span class="string">&#x27;Bearer <span class="subst">$apiKey</span>&#x27;</span>&#125;,</span><br><span class="line">  body: jsonEncode(&#123;</span><br><span class="line">    <span class="string">&#x27;model&#x27;</span>: <span class="string">&#x27;glm-4-flash&#x27;</span>,  <span class="comment">// 免费，快</span></span><br><span class="line">    <span class="string">&#x27;messages&#x27;</span>: [&#123;<span class="string">&#x27;role&#x27;</span>: <span class="string">&#x27;user&#x27;</span>, <span class="string">&#x27;content&#x27;</span>: <span class="string">&#x27;分析这道题：<span class="subst">$question</span>&#x27;</span>&#125;],</span><br><span class="line">  &#125;),</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="为什么分离"><a href="#为什么分离" class="headerlink" title="为什么分离"></a>为什么分离</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>图片识别</th>
+<th>文本解析</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>模型</td>
+<td>GLM-4V（多模态，贵）</td>
+<td>GLM-4-Flash（纯文本，免费）</td>
+</tr>
+<tr>
+<td>用途</td>
+<td>拍照时</td>
+<td>举一反三&#x2F;搜题</td>
+</tr>
+<tr>
+<td>调用频率</td>
+<td>每拍一次调一次</td>
+<td>按需调用</td>
+</tr>
+</tbody></table>
+<p>两个引擎独立配置 API Key 和 Model，用户在设置页自己选。</p>
+<h2 id="第五步：PDF-导出"><a href="#第五步：PDF-导出" class="headerlink" title="第五步：PDF 导出"></a>第五步：PDF 导出</h2><h3 id="中文乱码修复"><a href="#中文乱码修复" class="headerlink" title="中文乱码修复"></a>中文乱码修复</h3><p><code>pdf</code> 包默认不支持中文。加载 Noto Sans SC 字体：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 三级 fallback</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="comment">// 1. printing 包内置的 Google Fonts（有本地缓存）</span></span><br><span class="line">  <span class="keyword">final</span> font = <span class="keyword">await</span> PdfGoogleFonts.notoSansSCRegular();</span><br><span class="line">&#125; <span class="keyword">catch</span> (_) &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 2. 从 GitHub 下载</span></span><br><span class="line">    <span class="keyword">final</span> resp = <span class="keyword">await</span> http.<span class="keyword">get</span>(<span class="built_in">Uri</span>.parse(<span class="string">&#x27;https://github.com/google/fonts/raw/main/ofl/notosanssc/...&#x27;</span>));</span><br><span class="line">    font = pw.Font.ttf(ByteData.sublistView(resp.bodyBytes));</span><br><span class="line">  &#125; <span class="keyword">catch</span> (_) &#123;</span><br><span class="line">    <span class="comment">// 3. 兜底（中文丢失但不崩）</span></span><br><span class="line">    font = pw.Font.helvetica();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="试卷模式"><a href="#试卷模式" class="headerlink" title="试卷模式"></a>试卷模式</h3><p>选中多题 → 生成试卷 PDF → 每题留答题空白区：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 每题后面加一个 200pt 的空白区域</span></span><br><span class="line">pw.Container(</span><br><span class="line">  height: <span class="number">200</span>,</span><br><span class="line">  decoration: pw.BoxDecoration(border: pw.BoxBorder(top: <span class="keyword">true</span>, bottom: <span class="keyword">true</span>)),</span><br><span class="line">  child: pw.Center(child: pw.Text(<span class="string">&#x27;答题区&#x27;</span>)),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h2 id="第六步：编译与安装"><a href="#第六步：编译与安装" class="headerlink" title="第六步：编译与安装"></a>第六步：编译与安装</h2><h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">flutter build apk --debug                    <span class="comment"># 调试版</span></span><br><span class="line">flutter build apk --release                  <span class="comment"># 发布版</span></span><br></pre></td></tr></table></figure>
+
+<p>安装到手机：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb install -r build/app/outputs/flutter-apk/app-release.apk</span><br></pre></td></tr></table></figure>
+
+<h3 id="Web"><a href="#Web" class="headerlink" title="Web"></a>Web</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter build web --release --no-tree-shake-icons</span><br></pre></td></tr></table></figure>
+
+<p>产物在 <code>build/web/</code>，上传到 Nginx 就能访问。</p>
+<h3 id="macOS"><a href="#macOS" class="headerlink" title="macOS"></a>macOS</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter build macos --release --no-tree-shake-icons</span><br></pre></td></tr></table></figure>
+
+<p>产物在 <code>build/macos/Build/Products/Release/</code>，拖入应用程序文件夹。</p>
+<h3 id="no-tree-shake-icons-是什么"><a href="#no-tree-shake-icons-是什么" class="headerlink" title="--no-tree-shake-icons 是什么"></a><code>--no-tree-shake-icons</code> 是什么</h3><p>代码里如果用 Map 动态查找 IconData，Flutter 的图标优化器会报错。加这个参数跳过优化。不影响功能。</p>
+<h2 id="第七步：多平台自动构建（GitHub-Actions）"><a href="#第七步：多平台自动构建（GitHub-Actions）" class="headerlink" title="第七步：多平台自动构建（GitHub Actions）"></a>第七步：多平台自动构建（GitHub Actions）</h2><p>这是最省事的部分。配一个文件，以后打 tag 就自动编译 5 个平台。</p>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># .github/workflows/release.yml</span></span><br><span class="line"><span class="attr">name:</span> <span class="string">全平台自动构建</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">tags:</span> [<span class="string">&#x27;v*&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line">    <span class="attr">strategy:</span></span><br><span class="line">      <span class="attr">matrix:</span></span><br><span class="line">        <span class="attr">include:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">os:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">            <span class="attr">target:</span> <span class="string">android</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">os:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">            <span class="attr">target:</span> <span class="string">web</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">os:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">            <span class="attr">target:</span> <span class="string">linux</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">os:</span> <span class="string">macos-latest</span></span><br><span class="line">            <span class="attr">target:</span> <span class="string">macos</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">os:</span> <span class="string">windows-latest</span></span><br><span class="line">            <span class="attr">target:</span> <span class="string">windows</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">$&#123;&#123;</span> <span class="string">matrix.os</span> <span class="string">&#125;&#125;</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">subosito/flutter-action@v2</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">channel:</span> <span class="string">stable</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">flutter</span> <span class="string">pub</span> <span class="string">get</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">flutter</span> <span class="string">build</span> <span class="string">$&#123;&#123;</span> <span class="string">matrix.target</span> <span class="string">&#125;&#125;</span> <span class="string">--release</span> <span class="string">--no-tree-shake-icons</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">softprops/action-gh-release@v2</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">files:</span> <span class="string">build/...</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="触发构建"><a href="#触发构建" class="headerlink" title="触发构建"></a>触发构建</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git tag v1.0.0</span><br><span class="line">git push origin v1.0.0</span><br></pre></td></tr></table></figure>
+
+<p>GitHub 自动在 3 台云服务器上并行编译，产物自动上传到 Release。公开仓库完全免费。</p>
+<h2 id="第八步：发布到各渠道"><a href="#第八步：发布到各渠道" class="headerlink" title="第八步：发布到各渠道"></a>第八步：发布到各渠道</h2><h3 id="GitHub-Release（最通用）"><a href="#GitHub-Release（最通用）" class="headerlink" title="GitHub Release（最通用）"></a>GitHub Release（最通用）</h3><p>所有平台的安装包放一个 Release，用户自己选平台下载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gh release create v1.0.0 \</span><br><span class="line">  app-android.apk app-web.zip app-macos.zip \</span><br><span class="line">  --title <span class="string">&quot;v1.0.0&quot;</span> --notes <span class="string">&quot;更新说明&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="自己的服务器（APK-直链下载）"><a href="#自己的服务器（APK-直链下载）" class="headerlink" title="自己的服务器（APK 直链下载）"></a>自己的服务器（APK 直链下载）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp app-release.apk server:/var/www/myapp/app.apk</span><br></pre></td></tr></table></figure>
+
+<p>用户手机浏览器打开 <code>https://你的域名/app.apk</code> 直接下载安装。</p>
+<h3 id="Web-版部署"><a href="#Web-版部署" class="headerlink" title="Web 版部署"></a>Web 版部署</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r build/web/* server:/var/www/myapp/</span><br></pre></td></tr></table></figure>
+
+<p>Nginx 配置 SPA 兜底：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">location</span> / &#123;</span><br><span class="line">    <span class="attribute">try_files</span> <span class="variable">$uri</span> <span class="variable">$uri</span>/ /index.html;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="成本估算"><a href="#成本估算" class="headerlink" title="成本估算"></a>成本估算</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>费用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Flutter SDK</td>
+<td>免费</td>
+</tr>
+<tr>
+<td>GitHub Actions</td>
+<td>免费（公开仓库）</td>
+</tr>
+<tr>
+<td>智谱 GLM-4V</td>
+<td>有免费额度</td>
+</tr>
+<tr>
+<td>GLM-4-Flash</td>
+<td>完全免费</td>
+</tr>
+<tr>
+<td>Android APK 自分发</td>
+<td>免费</td>
+</tr>
+<tr>
+<td>Web 部署</td>
+<td>免费（自己服务器）</td>
+</tr>
+<tr>
+<td>Apple Developer（iOS&#x2F;macOS 上架）</td>
+<td>$99&#x2F;年</td>
+</tr>
+<tr>
+<td><strong>总计（不上 App Store）</strong></td>
+<td><strong>0 元</strong></td>
+</tr>
+</tbody></table>
+<h2 id="你可以直接把这段话甩给-AI"><a href="#你可以直接把这段话甩给-AI" class="headerlink" title="你可以直接把这段话甩给 AI"></a>你可以直接把这段话甩给 AI</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">我要做一个 Flutter App，功能是：拍照采集 + AI 识别 + 分类管理 + PDF 导出。</span><br><span class="line"></span><br><span class="line">技术栈：Flutter 3.44 + GLM-4V（图片识别）+ GLM-4-Flash（文本解析）+</span><br><span class="line">Provider + shared_preferences + pdf + image_picker</span><br><span class="line"></span><br><span class="line">8 个步骤：</span><br><span class="line">1. 环境准备：flutter doctor 全绿</span><br><span class="line">2. 项目创建：flutter create，配 pubspec.yaml</span><br><span class="line">3. 核心功能：拍照、存储、状态管理、列表、设置</span><br><span class="line">4. AI 接入：双引擎（视觉+文本），用户自填 API Key</span><br><span class="line">5. PDF 导出：中文不乱码，支持试卷模式</span><br><span class="line">6. 编译：--no-tree-shake-icons，build apk/web/macos</span><br><span class="line">7. GitHub Actions：打 tag 自动编译 5 个平台</span><br><span class="line">8. 发布：GitHub Release + 自己的服务器</span><br></pre></td></tr></table></figure>
+
+<p>AI 会帮你写出全部代码、配好 CI&#x2F;CD、编出 APK。你只需要测试和打 tag。</p>
+
+  </div>
+
+  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+  <section class="follow-card">
+    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+    <div class="follow-grid">
+      <div class="follow-block">
+        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+        <div class="follow-text">
+          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+        </div>
+      </div>
+      <div class="follow-block">
+        <div class="follow-text">
+          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+  </section>
+
+  <nav class="post-nav">
+    <a class="post-nav__prev" href="/2026/07/28/build-personal-website/">← 一台服务器搭起个人技术博客：Vue3 + Supabase + Nginx 全栈实战</a>
+    <a class="post-nav__next" href="/2026/07/28/flutter-multiplatform/">Flutter 多端开发实战：一套代码怎么编译发布到 Android / iOS / macOS / Windows / Linux / Web →</a>
+  </nav>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 豆奶与程序猫 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 · 托管于 GitHub Pages</p>
+      <p class="footer-social">
+        <a href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">📕 小红书：豆奶与程序猫</a>
+        <span>·</span>
+        <a href="https://github.com/soycodetrail" target="_blank" rel="noopener">💻 GitHub</a>
+        <span>·</span>
+        <a href="/atom.xml" target="_blank" rel="noopener">📰 RSS</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
