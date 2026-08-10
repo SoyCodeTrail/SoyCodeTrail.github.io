@@ -36,7 +36,8 @@
 
 - 静态站点生成器：[Hexo](https://hexo.io)
 - 托管：[GitHub Pages](https://pages.github.com)（用户页 `soycodetrail.github.io`）
-- 自动部署：GitHub Actions（push 到 `master` 自动构建并发布）
+- 部署：源码在 `source` 分支，`hexo deploy` 一键把构建产物发布到 `master` 分支（GitHub Pages 服务分支）
+  - 注：因当前 GitHub 令牌缺少 `workflow` 作用域，未使用 GitHub Actions CI；后续若授予该作用域，可切回 Actions 自动部署
 - RSS 订阅：`/atom.xml` · 站点地图：`/sitemap.xml`
 
 ---
