@@ -7,3 +7,6 @@ public/
 
 # Hexo 临时数据库
 db.json
+
+# Hexo 部署忽略
+.deploy_git/

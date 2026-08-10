@@ -45,8 +45,12 @@ pagination_dir: page
 # 主题
 theme: soyblog
 
-# 部署由 GitHub Actions 完成，无需本地 deployer
-# deploy: {}
+# 部署：Hexo 部署器把 public/ 推送到 master 分支（GitHub Pages 用户页）
+deploy:
+  type: git
+  repo: https://github.com/soycodetrail/soycodetrail.github.io.git
+  branch: master
+  message: "Site updated: {{ now('YYYY-MM-DD HH:mm:ss') }}"
 
 # RSS 订阅
 feed:
