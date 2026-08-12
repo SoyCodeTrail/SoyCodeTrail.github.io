@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,49 +13,58 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
+    
+<div class="post-layout">
+  <div class="post-main">
     <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">一套 Flutter 代码发布到全平台：从拍照 App 到多端发布的完整实战</h1>
-    <div class="post-meta">
-      <span>📅 2026-07-28</span>
-      
-      <span>⏱️ 25分钟</span>
-      
-    </div>
-    <div class="post-tags">
-      
-        <a class="tag" href="/tags/Flutter/">#Flutter</a>
-      
-        <a class="tag" href="/tags/%E5%A4%9A%E5%B9%B3%E5%8F%B0/">#多平台</a>
-      
-        <a class="tag" href="/tags/%E5%8F%91%E5%B8%83/">#发布</a>
-      
-        <a class="tag" href="/tags/CI-CD/">#CI/CD</a>
-      
-        <a class="tag" href="/tags/%E5%AE%9E%E6%88%98/">#实战</a>
-      
-    </div>
-  </header>
+      <header class="post-header">
+        <h1 class="post-title">一套 Flutter 代码发布到全平台：从拍照 App 到多端发布的完整实战</h1>
+        <div class="post-meta">
+          <span>📅 2026-07-28</span>
+          
+          <span>⏱️ 25分钟</span>
+          
+        </div>
+        <div class="post-tags">
+          
+            <a class="tag" href="/tags/Flutter/">#Flutter</a>
+          
+            <a class="tag" href="/tags/%E5%A4%9A%E5%B9%B3%E5%8F%B0/">#多平台</a>
+          
+            <a class="tag" href="/tags/%E5%8F%91%E5%B8%83/">#发布</a>
+          
+            <a class="tag" href="/tags/CI-CD/">#CI/CD</a>
+          
+            <a class="tag" href="/tags/%E5%AE%9E%E6%88%98/">#实战</a>
+          
+        </div>
+      </header>
 
-  <div class="post-content">
-    <p>上一篇讲了个人网站怎么用 Vue3 + Supabase + Nginx 搭起来。这次讲移动端——一套 Flutter 代码，怎么从零做到 Android + Web + macOS 三端发布，全程可以让 AI 帮你干活。</p>
+      <div class="post-content">
+        <p>上一篇讲了个人网站怎么用 Vue3 + Supabase + Nginx 搭起来。这次讲移动端——一套 Flutter 代码，怎么从零做到 Android + Web + macOS 三端发布，全程可以让 AI 帮你干活。</p>
 <h2 id="你可以直接把下面这段话甩给-AI"><a href="#你可以直接把下面这段话甩给-AI" class="headerlink" title="你可以直接把下面这段话甩给 AI"></a>你可以直接把下面这段话甩给 AI</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">我要做一个 App，主要实现：拍照采集、AI 识别、分类管理、PDF 打印导出。</span><br><span class="line">参考下面的技术栈和步骤：</span><br><span class="line"></span><br><span class="line">Flutter 3.44 + Dart + GLM-4V 视觉识别 + Provider 状态管理</span><br><span class="line"></span><br><span class="line">8 个步骤：</span><br><span class="line">环境准备 → 项目创建 → 核心功能开发 → AI 接入 → PDF 导出 → </span><br><span class="line">编译调试 → 多平台构建 → GitHub Release 发布</span><br><span class="line"></span><br><span class="line">仿照以下技术栈：</span><br><span class="line">- 框架：Flutter（一套代码编 Android/iOS/macOS/Windows/Linux/Web）</span><br><span class="line">- AI：智谱 GLM-4V（图片识别）+ GLM-4-Flash（文本解析，免费）</span><br><span class="line">- 存储：shared_preferences（本地 JSON）</span><br><span class="line">- PDF：pdf + printing 包</span><br><span class="line">- 拍照：image_picker</span><br><span class="line">- 状态：Provider</span><br><span class="line">- 发布：GitHub Actions 自动构建 5 个平台</span><br></pre></td></tr></table></figure>
 
 <h2 id="第一步：环境准备"><a href="#第一步：环境准备" class="headerlink" title="第一步：环境准备"></a>第一步：环境准备</h2><h3 id="装-Flutter"><a href="#装-Flutter" class="headerlink" title="装 Flutter"></a>装 Flutter</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Mac（推荐用 fvm 管理版本）</span></span><br><span class="line">brew install fvm</span><br><span class="line">fvm install 3.44.4</span><br><span class="line">fvm use 3.44.4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或直接下载</span></span><br><span class="line"><span class="comment"># https://docs.flutter.dev/get-started/install</span></span><br></pre></td></tr></table></figure>
@@ -197,35 +206,53 @@
 
 <p>AI 会帮你写出全部代码、配好 CI&#x2F;CD、编出 APK。你只需要测试和打 tag。</p>
 
+      </div>
+    </article>
+
+    <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+    <section class="follow-card">
+      <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+      <div class="follow-grid">
+        <div class="follow-block">
+          <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+          <div class="follow-text">
+            <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+            <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+          </div>
+        </div>
+        <div class="follow-block">
+          <div class="follow-text">
+            <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+            <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+            <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+          </div>
+        </div>
+      </div>
+      <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+    </section>
+
+    <!-- ===== 社交分享按钮 ===== -->
+    <div class="post-share">
+      <span class="share-label">🔗 分享：</span>
+      <button class="share-btn" data-share="weibo">微博</button>
+      <button class="share-btn" data-share="qq">QQ</button>
+      <button class="share-btn" data-share="xhs">小红书</button>
+      <button class="share-btn" data-share="copy">复制链接</button>
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-nav__prev" href="/2026/07/28/aosp-source-and-build/">← Android 16 源码获取与 SystemUI 编译全流程</a>
+      <a class="post-nav__next" href="/2026/07/28/flutter-multiplatform/">Flutter 多端开发实战：一套代码怎么编译发布到 Android / iOS / macOS / Windows / Linux / Web →</a>
+    </nav>
+
+    <p class="post-edit"><a href="https://github.com/soycodetrail/soycodetrail.github.io/blob/source/_posts/flutter-full-stack-guide.md" target="_blank" rel="noopener">✏️ 在 GitHub 上编辑此页</a></p>
   </div>
 
-  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
-  <section class="follow-card">
-    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
-    <div class="follow-grid">
-      <div class="follow-block">
-        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
-        <div class="follow-text">
-          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
-          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
-        </div>
-      </div>
-      <div class="follow-block">
-        <div class="follow-text">
-          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
-          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
-          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
-        </div>
-      </div>
-    </div>
-    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
-  </section>
-
-  <nav class="post-nav">
-    <a class="post-nav__prev" href="/2026/07/28/build-personal-website/">← 一台服务器搭起个人技术博客：Vue3 + Supabase + Nginx 全栈实战</a>
-    <a class="post-nav__next" href="/2026/07/28/flutter-multiplatform/">Flutter 多端开发实战：一套代码怎么编译发布到 Android / iOS / macOS / Windows / Linux / Web →</a>
-  </nav>
-</article>
+  <aside class="post-toc">
+    <button class="toc-toggle" id="toc-toggle">📑 目录</button>
+    <nav id="toc-list"></nav>
+  </aside>
+</div>
 
   </main>
 
@@ -241,5 +268,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

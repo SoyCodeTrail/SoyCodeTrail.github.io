@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,34 +13,32 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
     <section class="taxonomy">
   <h1 class="page-title">🏷️ 全部标签</h1>
   <div class="tag-cloud">
-    
-      <a class="tag" href="/tags/AOSP/">#AOSP <span class="tag-count">21</span></a>
-    
-      <a class="tag" href="/tags/%E7%BC%96%E8%AF%91/">#编译 <span class="tag-count">3</span></a>
-    
-      <a class="tag" href="/tags/SystemUI/">#SystemUI <span class="tag-count">2</span></a>
-    
-      <a class="tag" href="/tags/Docker/">#Docker <span class="tag-count">2</span></a>
     
       <a class="tag" href="/tags/AI/">#AI <span class="tag-count">2</span></a>
     
@@ -54,11 +52,7 @@
     
       <a class="tag" href="/tags/Prompt/">#Prompt <span class="tag-count">1</span></a>
     
-      <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码 <span class="tag-count">19</span></a>
-    
-      <a class="tag" href="/tags/repo/">#repo <span class="tag-count">1</span></a>
-    
-      <a class="tag" href="/tags/%E6%B8%85%E5%8D%8E%E9%95%9C%E5%83%8F/">#清华镜像 <span class="tag-count">1</span></a>
+      <a class="tag" href="/tags/AOSP/">#AOSP <span class="tag-count">21</span></a>
     
       <a class="tag" href="/tags/Android/">#Android <span class="tag-count">1</span></a>
     
@@ -71,6 +65,18 @@
       <a class="tag" href="/tags/SystemServer/">#SystemServer <span class="tag-count">1</span></a>
     
       <a class="tag" href="/tags/Launcher/">#Launcher <span class="tag-count">2</span></a>
+    
+      <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码 <span class="tag-count">19</span></a>
+    
+      <a class="tag" href="/tags/%E7%BC%96%E8%AF%91/">#编译 <span class="tag-count">3</span></a>
+    
+      <a class="tag" href="/tags/SystemUI/">#SystemUI <span class="tag-count">2</span></a>
+    
+      <a class="tag" href="/tags/Docker/">#Docker <span class="tag-count">2</span></a>
+    
+      <a class="tag" href="/tags/repo/">#repo <span class="tag-count">1</span></a>
+    
+      <a class="tag" href="/tags/%E6%B8%85%E5%8D%8E%E9%95%9C%E5%83%8F/">#清华镜像 <span class="tag-count">1</span></a>
     
       <a class="tag" href="/tags/Android-Studio/">#Android Studio <span class="tag-count">1</span></a>
     
@@ -108,6 +114,10 @@
     
       <a class="tag" href="/tags/%E5%AE%9E%E6%88%98/">#实战 <span class="tag-count">1</span></a>
     
+      <a class="tag" href="/tags/Launcher3/">#Launcher3 <span class="tag-count">15</span></a>
+    
+      <a class="tag" href="/tags/Framework/">#Framework <span class="tag-count">16</span></a>
+    
       <a class="tag" href="/tags/Java/">#Java <span class="tag-count">1</span></a>
     
       <a class="tag" href="/tags/Spring-Boot/">#Spring Boot <span class="tag-count">1</span></a>
@@ -116,21 +126,17 @@
     
       <a class="tag" href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">#微服务 <span class="tag-count">1</span></a>
     
-      <a class="tag" href="/tags/Launcher3/">#Launcher3 <span class="tag-count">15</span></a>
-    
-      <a class="tag" href="/tags/Framework/">#Framework <span class="tag-count">16</span></a>
-    
       <a class="tag" href="/tags/DragAndDrop/">#DragAndDrop <span class="tag-count">1</span></a>
-    
-      <a class="tag" href="/tags/Touch/">#Touch <span class="tag-count">1</span></a>
-    
-      <a class="tag" href="/tags/Gesture/">#Gesture <span class="tag-count">1</span></a>
-    
-      <a class="tag" href="/tags/Animation/">#Animation <span class="tag-count">1</span></a>
     
       <a class="tag" href="/tags/Shortcut/">#Shortcut <span class="tag-count">1</span></a>
     
       <a class="tag" href="/tags/Widget/">#Widget <span class="tag-count">1</span></a>
+    
+      <a class="tag" href="/tags/Animation/">#Animation <span class="tag-count">1</span></a>
+    
+      <a class="tag" href="/tags/Touch/">#Touch <span class="tag-count">1</span></a>
+    
+      <a class="tag" href="/tags/Gesture/">#Gesture <span class="tag-count">1</span></a>
     
       <a class="tag" href="/tags/RemoteAnimation/">#RemoteAnimation <span class="tag-count">1</span></a>
     
@@ -173,5 +179,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

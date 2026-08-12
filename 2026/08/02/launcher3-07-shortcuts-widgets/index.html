@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,51 +13,60 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
+    
+<div class="post-layout">
+  <div class="post-main">
     <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">Launcher3 源码精读（07）：快捷方式与小组件</h1>
-    <div class="post-meta">
-      <span>📅 2026-08-02</span>
-      
-      <span>⏱️ 29分钟</span>
-      
-    </div>
-    <div class="post-tags">
-      
-        <a class="tag" href="/tags/AOSP/">#AOSP</a>
-      
-        <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
-      
-        <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
-      
-        <a class="tag" href="/tags/Framework/">#Framework</a>
-      
-        <a class="tag" href="/tags/Shortcut/">#Shortcut</a>
-      
-        <a class="tag" href="/tags/Widget/">#Widget</a>
-      
-    </div>
-  </header>
+      <header class="post-header">
+        <h1 class="post-title">Launcher3 源码精读（07）：快捷方式与小组件</h1>
+        <div class="post-meta">
+          <span>📅 2026-08-02</span>
+          
+          <span>⏱️ 29分钟</span>
+          
+        </div>
+        <div class="post-tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+          
+            <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
+          
+            <a class="tag" href="/tags/Framework/">#Framework</a>
+          
+            <a class="tag" href="/tags/Shortcut/">#Shortcut</a>
+          
+            <a class="tag" href="/tags/Widget/">#Widget</a>
+          
+        </div>
+      </header>
 
-  <div class="post-content">
-    <h1 id="07-·-Launcher3-快捷方式与小组件"><a href="#07-·-Launcher3-快捷方式与小组件" class="headerlink" title="07 · Launcher3 快捷方式与小组件"></a>07 · Launcher3 快捷方式与小组件</h1><p>长按是 Launcher 的核心二级交互。本文拆两条主线：长按应用图标弹出的快捷菜单（Deep Shortcuts + System Shortcuts），以及添加小组件到桌面的端到端流程（Picker → 拖拽 → 绑定 → 调整大小）。两条线共用同一套 <code>DragController</code> 拖拽基础设施，差别只在数据来源与落位处理。</p>
+      <div class="post-content">
+        <h1 id="07-·-Launcher3-快捷方式与小组件"><a href="#07-·-Launcher3-快捷方式与小组件" class="headerlink" title="07 · Launcher3 快捷方式与小组件"></a>07 · Launcher3 快捷方式与小组件</h1><p>长按是 Launcher 的核心二级交互。本文拆两条主线：长按应用图标弹出的快捷菜单（Deep Shortcuts + System Shortcuts），以及添加小组件到桌面的端到端流程（Picker → 拖拽 → 绑定 → 调整大小）。两条线共用同一套 <code>DragController</code> 拖拽基础设施，差别只在数据来源与落位处理。</p>
 <blockquote>
 <p>源码基线：<code>packages/apps/Launcher3/src/com/android/launcher3/</code><br>关键目录：<code>popup/</code>、<code>shortcuts/</code>、<code>widget/</code>、<code>widget/picker/</code>、<code>widgetpicker/</code>、<code>AppWidgetResizeFrame.kt</code></p>
 </blockquote>
@@ -545,35 +554,53 @@
 <p><strong>Q：widget 预加载为什么能提升体验？</strong><br>A：因为 widget 的”分配 id → 跨进程绑定 provider → inflate RemoteViews”这几步都涉及 binder 调用和跨进程视图渲染，总耗时可能上百毫秒。<code>WidgetHostViewLoader</code> 利用用户拖拽这段时间并行完成——<code>onDragStart</code> 立刻 post 绑定 Runnable，绑定成功立刻 inflate 出 HostView 加到 DragLayer（INVISIBLE）。这样用户松手 drop 时 widget 已经准备好了，几乎瞬间显示，而不是 drop 后才开始绑定导致白屏等待。如果用户拖到一半取消，<code>onDragEnd</code> 会 <code>deleteAppWidgetId</code> 回收预分配的 id 并 <code>removeView</code> 清理 HostView，不留资源泄漏。这是典型的”用并行时间换体验”——把不可避免的耗时操作藏进用户感知不到的拖拽时间段。需要注意：如果 widget <code>needsConfigure</code>（必须配置），不预加载，因为配置会改变最终内容，预绑定会浪费。</p>
 <p><strong>Q：sortAndFilterShortcuts 的”至少 2 条 dynamic”规则是怎么实现的？</strong><br>A：排序后先取前 <code>MAX_SHORTCUTS=4</code> 条放入 filtered 列表，同时统计其中 dynamic 数量 <code>numDynamic</code>。然后继续遍历剩余的 shortcut：如果遇到 dynamic 且 <code>numDynamic &lt; NUM_DYNAMIC(2)</code>，就 <code>numDynamic++</code>，计算 <code>lastStaticIndex = filteredSize - numDynamic</code>（从尾部往前找 static 的位置），<code>filteredShortcuts.remove(lastStaticIndex)</code> 移除一个 static，再 <code>add</code> 把 dynamic 加进去。这样保证最终结果里至少有 2 条 dynamic，挤掉了同等数量的 static。这反映了设计意图：manifest static 稳定但 stale，dynamic 新鲜但易变，强制保留 dynamic 让用户看到最新行为入口。</p>
 
+      </div>
+    </article>
+
+    <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+    <section class="follow-card">
+      <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+      <div class="follow-grid">
+        <div class="follow-block">
+          <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+          <div class="follow-text">
+            <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+            <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+          </div>
+        </div>
+        <div class="follow-block">
+          <div class="follow-text">
+            <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+            <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+            <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+          </div>
+        </div>
+      </div>
+      <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+    </section>
+
+    <!-- ===== 社交分享按钮 ===== -->
+    <div class="post-share">
+      <span class="share-label">🔗 分享：</span>
+      <button class="share-btn" data-share="weibo">微博</button>
+      <button class="share-btn" data-share="qq">QQ</button>
+      <button class="share-btn" data-share="xhs">小红书</button>
+      <button class="share-btn" data-share="copy">复制链接</button>
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-nav__prev" href="/2026/08/02/launcher3-06-state-machine/">← Launcher3 源码精读（06）：状态机</a>
+      <a class="post-nav__next" href="/2026/08/02/launcher3-09-animation/">Launcher3 源码精读（09）：动画系统 →</a>
+    </nav>
+
+    <p class="post-edit"><a href="https://github.com/soycodetrail/soycodetrail.github.io/blob/source/_posts/launcher3-07-shortcuts-widgets.md" target="_blank" rel="noopener">✏️ 在 GitHub 上编辑此页</a></p>
   </div>
 
-  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
-  <section class="follow-card">
-    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
-    <div class="follow-grid">
-      <div class="follow-block">
-        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
-        <div class="follow-text">
-          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
-          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
-        </div>
-      </div>
-      <div class="follow-block">
-        <div class="follow-text">
-          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
-          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
-          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
-        </div>
-      </div>
-    </div>
-    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
-  </section>
-
-  <nav class="post-nav">
-    <a class="post-nav__prev" href="/2026/08/02/launcher3-09-animation/">← Launcher3 源码精读（09）：动画系统</a>
-    <a class="post-nav__next" href="/2026/08/02/launcher3-14-launch-animation/">Launcher3 源码精读（14）：应用启动与远程动效时序图 →</a>
-  </nav>
-</article>
+  <aside class="post-toc">
+    <button class="toc-toggle" id="toc-toggle">📑 目录</button>
+    <nav id="toc-list"></nav>
+  </aside>
+</div>
 
   </main>
 
@@ -589,5 +616,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

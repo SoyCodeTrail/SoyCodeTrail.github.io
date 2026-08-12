@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,23 +13,29 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
     <section class="home">
   <div class="home-intro">
     <h1 class="home-title">豆奶与程序猫的技术博客</h1>
@@ -67,30 +73,6 @@
     
       <article class="post-card">
         <h2 class="post-card__title">
-          <a href="/2026/07/28/aosp-source-and-build/">Android 16 源码获取与 SystemUI 编译全流程</a>
-        </h2>
-        <div class="post-card__meta">
-          <span>📅 2026-07-28</span>
-          
-          <span>⏱️ 18分钟</span>
-          
-        </div>
-        <p class="post-card__excerpt">背景 在 Apple M3 Max (arm64) 上编译 AOSP SystemUI，目标版本 android-16.0.0r4，目标设备为模拟器。记录从源码获取到编译成功的完整流程。 源码获取 用清华镜像（国内直连，…</p>
-        <div class="post-card__tags">
-          
-            <a class="tag" href="/tags/AOSP/">#AOSP</a>
-          
-            <a class="tag" href="/tags/%E7%BC%96%E8%AF%91/">#编译</a>
-          
-            <a class="tag" href="/tags/SystemUI/">#SystemUI</a>
-          
-            <a class="tag" href="/tags/Docker/">#Docker</a>
-          
-        </div>
-      </article>
-    
-      <article class="post-card">
-        <h2 class="post-card__title">
           <a href="/2026/07/28/build-personal-website/">一台服务器搭起个人技术博客：Vue3 + Supabase + Nginx 全栈实战</a>
         </h2>
         <div class="post-card__meta">
@@ -111,6 +93,30 @@
             <a class="tag" href="/tags/%E9%83%A8%E7%BD%B2/">#部署</a>
           
             <a class="tag" href="/tags/%E5%85%A8%E6%A0%88/">#全栈</a>
+          
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <h2 class="post-card__title">
+          <a href="/2026/07/28/aosp-source-and-build/">Android 16 源码获取与 SystemUI 编译全流程</a>
+        </h2>
+        <div class="post-card__meta">
+          <span>📅 2026-07-28</span>
+          
+          <span>⏱️ 18分钟</span>
+          
+        </div>
+        <p class="post-card__excerpt">背景 在 Apple M3 Max (arm64) 上编译 AOSP SystemUI，目标版本 android-16.0.0r4，目标设备为模拟器。记录从源码获取到编译成功的完整流程。 源码获取 用清华镜像（国内直连，…</p>
+        <div class="post-card__tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/%E7%BC%96%E8%AF%91/">#编译</a>
+          
+            <a class="tag" href="/tags/SystemUI/">#SystemUI</a>
+          
+            <a class="tag" href="/tags/Docker/">#Docker</a>
           
         </div>
       </article>
@@ -206,9 +212,9 @@
           
             <a class="tag" href="/tags/AOSP/">#AOSP</a>
           
-            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
-          
             <a class="tag" href="/tags/Launcher/">#Launcher</a>
+          
+            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
           
             <a class="tag" href="/tags/Framework/">#Framework</a>
           
@@ -267,7 +273,7 @@
     
       <article class="post-card">
         <h2 class="post-card__title">
-          <a href="/2026/07/28/vibe-website/">个人技术博客网站</a>
+          <a href="/2026/07/28/vibe-shicuoben/">拾错本 - AI 智能错题本 App</a>
         </h2>
         <div class="post-card__meta">
           <span>📅 2026-07-28</span>
@@ -275,14 +281,14 @@
           
           
         </div>
-        <p class="post-card__excerpt">Vue3 + Supabase + Nginx 全栈搭建的个人技术博客，支持 Markdown 发布、多分类管理。</p>
+        <p class="post-card__excerpt">拍照采集错题，AI 自动识别题目内容和科目，支持举一反三、试卷组卷、PDF 打印导出。</p>
         <div class="post-card__tags">
           
-            <a class="tag" href="/tags/Vue3/">#Vue3</a>
+            <a class="tag" href="/tags/Flutter/">#Flutter</a>
           
-            <a class="tag" href="/tags/Nginx/">#Nginx</a>
+            <a class="tag" href="/tags/Dart/">#Dart</a>
           
-            <a class="tag" href="/tags/Supabase/">#Supabase</a>
+            <a class="tag" href="/tags/GLM-4V/">#GLM-4V</a>
           
         </div>
       </article>
@@ -306,5 +312,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

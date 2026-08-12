@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,23 +13,29 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
     <section class="home">
   <div class="home-intro">
     <h1 class="home-title">豆奶与程序猫的技术博客</h1>
@@ -38,6 +44,32 @@
   </div>
 
   <div class="post-list">
+    
+      <article class="post-card">
+        <h2 class="post-card__title">
+          <a href="/2026/08/02/launcher3-09-animation/">Launcher3 源码精读（09）：动画系统</a>
+        </h2>
+        <div class="post-card__meta">
+          <span>📅 2026-08-02</span>
+          
+          <span>⏱️ 23分钟</span>
+          
+        </div>
+        <p class="post-card__excerpt">Launcher3 动画系统 Launcher3 的动画系统不是一坨散落的 ObjectAnimator，而是一套分层的基础设施。最底层是插值器、首帧优化、可中断动画器这些”零件”；中间层是 PendingAnimati…</p>
+        <div class="post-card__tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+          
+            <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
+          
+            <a class="tag" href="/tags/Framework/">#Framework</a>
+          
+            <a class="tag" href="/tags/Animation/">#Animation</a>
+          
+        </div>
+      </article>
     
       <article class="post-card">
         <h2 class="post-card__title">
@@ -69,7 +101,7 @@
     
       <article class="post-card">
         <h2 class="post-card__title">
-          <a href="/2026/08/02/launcher3-09-animation/">Launcher3 源码精读（09）：动画系统</a>
+          <a href="/2026/08/02/launcher3-08-folder/">Launcher3 源码精读（08）：文件夹机制</a>
         </h2>
         <div class="post-card__meta">
           <span>📅 2026-08-02</span>
@@ -77,7 +109,7 @@
           <span>⏱️ 23分钟</span>
           
         </div>
-        <p class="post-card__excerpt">Launcher3 动画系统 Launcher3 的动画系统不是一坨散落的 ObjectAnimator，而是一套分层的基础设施。最底层是插值器、首帧优化、可中断动画器这些”零件”；中间层是 PendingAnimati…</p>
+        <p class="post-card__excerpt">Launcher3 的文件夹机制是一套”图标聚合”系统：把桌面上零散的 app 图标收进一个可展开的容器里。这套系统的复杂度集中在三件事上——桌面上那个圆角预览图标怎么画、点击后图标如何”放大”成全屏容器、以及图标在容器…</p>
         <div class="post-card__tags">
           
             <a class="tag" href="/tags/AOSP/">#AOSP</a>
@@ -87,36 +119,6 @@
             <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
           
             <a class="tag" href="/tags/Framework/">#Framework</a>
-          
-            <a class="tag" href="/tags/Animation/">#Animation</a>
-          
-        </div>
-      </article>
-    
-      <article class="post-card">
-        <h2 class="post-card__title">
-          <a href="/2026/08/02/launcher3-07-shortcuts-widgets/">Launcher3 源码精读（07）：快捷方式与小组件</a>
-        </h2>
-        <div class="post-card__meta">
-          <span>📅 2026-08-02</span>
-          
-          <span>⏱️ 29分钟</span>
-          
-        </div>
-        <p class="post-card__excerpt">07 · Launcher3 快捷方式与小组件 长按是 Launcher 的核心二级交互。本文拆两条主线：长按应用图标弹出的快捷菜单（Deep Shortcuts + System Shortcuts），以及添加小组件到…</p>
-        <div class="post-card__tags">
-          
-            <a class="tag" href="/tags/AOSP/">#AOSP</a>
-          
-            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
-          
-            <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
-          
-            <a class="tag" href="/tags/Framework/">#Framework</a>
-          
-            <a class="tag" href="/tags/Shortcut/">#Shortcut</a>
-          
-            <a class="tag" href="/tags/Widget/">#Widget</a>
           
         </div>
       </article>
@@ -145,6 +147,30 @@
             <a class="tag" href="/tags/RemoteAnimation/">#RemoteAnimation</a>
           
             <a class="tag" href="/tags/%E6%97%B6%E5%BA%8F%E5%9B%BE/">#时序图</a>
+          
+        </div>
+      </article>
+    
+      <article class="post-card">
+        <h2 class="post-card__title">
+          <a href="/2026/08/02/launcher3-11-custom-view/">Launcher3 源码精读（11）：自定义视图</a>
+        </h2>
+        <div class="post-card__meta">
+          <span>📅 2026-08-02</span>
+          
+          <span>⏱️ 21分钟</span>
+          
+        </div>
+        <p class="post-card__excerpt">Launcher3 自定义视图体系 Launcher3 的整个界面几乎全部由自定义 View 构成，从桌面图标、文件夹、AllApps 列表，到拖拽时弹出的删除栏、长按弹出的快捷方式菜单、底部的 Snackbar 提示，…</p>
+        <div class="post-card__tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+          
+            <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
+          
+            <a class="tag" href="/tags/Framework/">#Framework</a>
           
         </div>
       </article>
@@ -199,24 +225,28 @@
     
       <article class="post-card">
         <h2 class="post-card__title">
-          <a href="/2026/08/02/launcher3-11-custom-view/">Launcher3 源码精读（11）：自定义视图</a>
+          <a href="/2026/07/28/ai-coding-guide-2026/">2026年，零基础怎么学 AI 和编程</a>
         </h2>
         <div class="post-card__meta">
-          <span>📅 2026-08-02</span>
+          <span>📅 2026-07-28</span>
           
-          <span>⏱️ 21分钟</span>
+          <span>⏱️ 30分钟</span>
           
         </div>
-        <p class="post-card__excerpt">Launcher3 自定义视图体系 Launcher3 的整个界面几乎全部由自定义 View 构成，从桌面图标、文件夹、AllApps 列表，到拖拽时弹出的删除栏、长按弹出的快捷方式菜单、底部的 Snackbar 提示，…</p>
+        <p class="post-card__excerpt">写给完全没基础的人——非科班、没写过代码、甚至中小学生，看完知道从哪开始、用什么工具、花多少钱、走哪条路。 目录 先搞清楚一件事 — 2026年学编程跟以前有什么不同 第一步：选一门语言入门 — 为什么选 Python …</p>
         <div class="post-card__tags">
           
-            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+            <a class="tag" href="/tags/AI/">#AI</a>
           
-            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+            <a class="tag" href="/tags/%E7%BC%96%E7%A8%8B/">#编程</a>
           
-            <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
+            <a class="tag" href="/tags/%E9%9B%B6%E5%9F%BA%E7%A1%80/">#零基础</a>
           
-            <a class="tag" href="/tags/Framework/">#Framework</a>
+            <a class="tag" href="/tags/Python/">#Python</a>
+          
+            <a class="tag" href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/">#学习路线</a>
+          
+            <a class="tag" href="/tags/Prompt/">#Prompt</a>
           
         </div>
       </article>
@@ -241,34 +271,6 @@
             <a class="tag" href="/tags/SystemUI/">#SystemUI</a>
           
             <a class="tag" href="/tags/Docker/">#Docker</a>
-          
-        </div>
-      </article>
-    
-      <article class="post-card">
-        <h2 class="post-card__title">
-          <a href="/2026/07/28/ai-coding-guide-2026/">2026年，零基础怎么学 AI 和编程</a>
-        </h2>
-        <div class="post-card__meta">
-          <span>📅 2026-07-28</span>
-          
-          <span>⏱️ 30分钟</span>
-          
-        </div>
-        <p class="post-card__excerpt">写给完全没基础的人——非科班、没写过代码、甚至中小学生，看完知道从哪开始、用什么工具、花多少钱、走哪条路。 目录 先搞清楚一件事 — 2026年学编程跟以前有什么不同 第一步：选一门语言入门 — 为什么选 Python …</p>
-        <div class="post-card__tags">
-          
-            <a class="tag" href="/tags/AI/">#AI</a>
-          
-            <a class="tag" href="/tags/%E7%BC%96%E7%A8%8B/">#编程</a>
-          
-            <a class="tag" href="/tags/%E9%9B%B6%E5%9F%BA%E7%A1%80/">#零基础</a>
-          
-            <a class="tag" href="/tags/Python/">#Python</a>
-          
-            <a class="tag" href="/tags/%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/">#学习路线</a>
-          
-            <a class="tag" href="/tags/Prompt/">#Prompt</a>
           
         </div>
       </article>
@@ -316,5 +318,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

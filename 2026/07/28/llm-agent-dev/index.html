@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,49 +13,58 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
+    
+<div class="post-layout">
+  <div class="post-main">
     <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">大模型 Agent 开发实战：让 AI 真正干活的技术栈</h1>
-    <div class="post-meta">
-      <span>📅 2026-07-28</span>
-      
-      <span>⏱️ 18分钟</span>
-      
-    </div>
-    <div class="post-tags">
-      
-        <a class="tag" href="/tags/LLM/">#LLM</a>
-      
-        <a class="tag" href="/tags/Agent/">#Agent</a>
-      
-        <a class="tag" href="/tags/MCP/">#MCP</a>
-      
-        <a class="tag" href="/tags/Claude/">#Claude</a>
-      
-        <a class="tag" href="/tags/GLM/">#GLM</a>
-      
-    </div>
-  </header>
+      <header class="post-header">
+        <h1 class="post-title">大模型 Agent 开发实战：让 AI 真正干活的技术栈</h1>
+        <div class="post-meta">
+          <span>📅 2026-07-28</span>
+          
+          <span>⏱️ 18分钟</span>
+          
+        </div>
+        <div class="post-tags">
+          
+            <a class="tag" href="/tags/LLM/">#LLM</a>
+          
+            <a class="tag" href="/tags/Agent/">#Agent</a>
+          
+            <a class="tag" href="/tags/MCP/">#MCP</a>
+          
+            <a class="tag" href="/tags/Claude/">#Claude</a>
+          
+            <a class="tag" href="/tags/GLM/">#GLM</a>
+          
+        </div>
+      </header>
 
-  <div class="post-content">
-    <p>跟 ChatGPT 聊两句、让它写段文案，这事早就不新鲜了。真正有意思的是另一件事：怎么让大模型不是停留在对话框里，而是真的去干活——查数据库、调接口、改代码、跑脚本、把一个复杂任务从头到尾跑完。</p>
+      <div class="post-content">
+        <p>跟 ChatGPT 聊两句、让它写段文案，这事早就不新鲜了。真正有意思的是另一件事：怎么让大模型不是停留在对话框里，而是真的去干活——查数据库、调接口、改代码、跑脚本、把一个复杂任务从头到尾跑完。</p>
 <p>这就是 Agent 要解决的问题。这篇把目前实际在用的那套技术栈拆一遍：LLM API 怎么调、Function Calling 怎么接、MCP 是个啥、ReAct 循环怎么转，以及最后落地时模型和框架怎么选。</p>
 <h2 id="先把概念掰开：Agent-不是聊天机器人"><a href="#先把概念掰开：Agent-不是聊天机器人" class="headerlink" title="先把概念掰开：Agent 不是聊天机器人"></a>先把概念掰开：Agent 不是聊天机器人</h2><p>一个普通的大模型调用，本质是 <code>prompt 进、token 出</code>，模型本身没有任何外部能力。问它今天北京天气，它要么编一个，要么老实说不知道。</p>
 <p>Agent 的核心区别在于<strong>模型能调工具、能多步执行</strong>。模型本身不动手，但它可以决定”我现在需要调用 <code>get_weather(&quot;北京&quot;)</code> 这个函数”，外部程序把这个函数真正跑一遍，把结果塞回给模型，模型再决定下一步干啥。</p>
@@ -178,35 +187,53 @@
 <p>Agent 这块技术栈变化极快，半年前的最佳实践现在可能已经过时。但底层的几个东西是稳的：Function Calling 的调用循环、MCP 这种工具标准化协议、ReAct 的思考-行动范式。把这些吃透，新框架新模型冒出来也能很快上手。</p>
 <p>把工具准备好，把循环跑通，剩下的就是反复打磨——让 AI 真正干活这事，难的不是某个炫技功能，而是把每一轮调用、每一个工具、每一次错误处理都做到稳。</p>
 
+      </div>
+    </article>
+
+    <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+    <section class="follow-card">
+      <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+      <div class="follow-grid">
+        <div class="follow-block">
+          <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+          <div class="follow-text">
+            <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+            <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+          </div>
+        </div>
+        <div class="follow-block">
+          <div class="follow-text">
+            <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+            <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+            <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+          </div>
+        </div>
+      </div>
+      <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+    </section>
+
+    <!-- ===== 社交分享按钮 ===== -->
+    <div class="post-share">
+      <span class="share-label">🔗 分享：</span>
+      <button class="share-btn" data-share="weibo">微博</button>
+      <button class="share-btn" data-share="qq">QQ</button>
+      <button class="share-btn" data-share="xhs">小红书</button>
+      <button class="share-btn" data-share="copy">复制链接</button>
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-nav__prev" href="/2026/07/28/launcher3-architecture/">← Launcher3 源码精读：从数据加载到 UI 渲染的完整链路</a>
+      <a class="post-nav__next" href="/2026/07/28/vibe-tools-collection/">AI 编程工具收藏与对比 →</a>
+    </nav>
+
+    <p class="post-edit"><a href="https://github.com/soycodetrail/soycodetrail.github.io/blob/source/_posts/llm-agent-dev.md" target="_blank" rel="noopener">✏️ 在 GitHub 上编辑此页</a></p>
   </div>
 
-  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
-  <section class="follow-card">
-    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
-    <div class="follow-grid">
-      <div class="follow-block">
-        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
-        <div class="follow-text">
-          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
-          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
-        </div>
-      </div>
-      <div class="follow-block">
-        <div class="follow-text">
-          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
-          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
-          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
-        </div>
-      </div>
-    </div>
-    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
-  </section>
-
-  <nav class="post-nav">
-    <a class="post-nav__prev" href="/2026/07/28/launcher3-architecture/">← Launcher3 源码精读：从数据加载到 UI 渲染的完整链路</a>
-    <a class="post-nav__next" href="/2026/07/28/vibe-tools-collection/">AI 编程工具收藏与对比 →</a>
-  </nav>
-</article>
+  <aside class="post-toc">
+    <button class="toc-toggle" id="toc-toggle">📑 目录</button>
+    <nav id="toc-list"></nav>
+  </aside>
+</div>
 
   </main>
 
@@ -222,5 +249,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

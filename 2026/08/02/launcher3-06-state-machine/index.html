@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,47 +13,56 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
+    
+<div class="post-layout">
+  <div class="post-main">
     <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">Launcher3 源码精读（06）：状态机</h1>
-    <div class="post-meta">
-      <span>📅 2026-08-02</span>
-      
-      <span>⏱️ 21分钟</span>
-      
-    </div>
-    <div class="post-tags">
-      
-        <a class="tag" href="/tags/AOSP/">#AOSP</a>
-      
-        <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
-      
-        <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
-      
-        <a class="tag" href="/tags/Framework/">#Framework</a>
-      
-    </div>
-  </header>
+      <header class="post-header">
+        <h1 class="post-title">Launcher3 源码精读（06）：状态机</h1>
+        <div class="post-meta">
+          <span>📅 2026-08-02</span>
+          
+          <span>⏱️ 21分钟</span>
+          
+        </div>
+        <div class="post-tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+          
+            <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
+          
+            <a class="tag" href="/tags/Framework/">#Framework</a>
+          
+        </div>
+      </header>
 
-  <div class="post-content">
-    <h1 id="06-·-Launcher3-状态机（LauncherState-StateManager-StateHandler）"><a href="#06-·-Launcher3-状态机（LauncherState-StateManager-StateHandler）" class="headerlink" title="06 · Launcher3 状态机（LauncherState &#x2F; StateManager &#x2F; StateHandler）"></a>06 · Launcher3 状态机（LauncherState &#x2F; StateManager &#x2F; StateHandler）</h1><p>Launcher3 把「桌面 &#x2F; All Apps &#x2F; 最近任务 &#x2F; 拖拽编辑」之间的切换抽象成一台状态机。状态本身是纯数据（不含任何 View 引用、不含任何动画逻辑），切换由引擎 <code>StateManager</code> 统一调度，落到具体 UI 上的位移&#x2F;缩放&#x2F;透明由各 <code>StateHandler</code> 自行解释。这种「纯数据状态 + 引擎 + 解释器」的三层切分是整套机制的核心。</p>
+      <div class="post-content">
+        <h1 id="06-·-Launcher3-状态机（LauncherState-StateManager-StateHandler）"><a href="#06-·-Launcher3-状态机（LauncherState-StateManager-StateHandler）" class="headerlink" title="06 · Launcher3 状态机（LauncherState &#x2F; StateManager &#x2F; StateHandler）"></a>06 · Launcher3 状态机（LauncherState &#x2F; StateManager &#x2F; StateHandler）</h1><p>Launcher3 把「桌面 &#x2F; All Apps &#x2F; 最近任务 &#x2F; 拖拽编辑」之间的切换抽象成一台状态机。状态本身是纯数据（不含任何 View 引用、不含任何动画逻辑），切换由引擎 <code>StateManager</code> 统一调度，落到具体 UI 上的位移&#x2F;缩放&#x2F;透明由各 <code>StateHandler</code> 自行解释。这种「纯数据状态 + 引擎 + 解释器」的三层切分是整套机制的核心。</p>
 <blockquote>
 <p>源码路径</p>
 <ul>
@@ -548,35 +557,53 @@
 <p><strong>Q2：<code>shouldAnimateStateChange</code> 为什么在 Activity 未 started 时返回 false？</strong><br>onCreate &#x2F; onResume 期间触发的状态切换（如从 savedState 恢复）此时界面还没显示，动画无意义且可能因 View 未 measure 而异常。返回 false 让 <code>goToState</code> 走无动画分支，直接 setState。<code>moveToRestState</code> 也用它判断是否动画归位。</p>
 <p><strong>Q3：预测式返回为什么用 handler 的 onBackProgressed 而不是 AnimatorPlaybackController？</strong><br>预测式返回需要的是「按手势进度施加局部效果」（如 AllApps 缩放），不是完整的状态切换动画。handler 的 onBackProgressed 可以只施加自己关心的属性，不触发完整 PendingAnimation 构建。松手提交（<code>onBackInvoked</code>）时才走完整 goToState 动画，分工清晰。</p>
 
+      </div>
+    </article>
+
+    <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+    <section class="follow-card">
+      <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+      <div class="follow-grid">
+        <div class="follow-block">
+          <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+          <div class="follow-text">
+            <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+            <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+          </div>
+        </div>
+        <div class="follow-block">
+          <div class="follow-text">
+            <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+            <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+            <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+          </div>
+        </div>
+      </div>
+      <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+    </section>
+
+    <!-- ===== 社交分享按钮 ===== -->
+    <div class="post-share">
+      <span class="share-label">🔗 分享：</span>
+      <button class="share-btn" data-share="weibo">微博</button>
+      <button class="share-btn" data-share="qq">QQ</button>
+      <button class="share-btn" data-share="xhs">小红书</button>
+      <button class="share-btn" data-share="copy">复制链接</button>
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-nav__prev" href="/2026/08/02/launcher3-04-app-drawer/">← Launcher3 源码精读（04）：应用抽屉</a>
+      <a class="post-nav__next" href="/2026/08/02/launcher3-07-shortcuts-widgets/">Launcher3 源码精读（07）：快捷方式与小组件 →</a>
+    </nav>
+
+    <p class="post-edit"><a href="https://github.com/soycodetrail/soycodetrail.github.io/blob/source/_posts/launcher3-06-state-machine.md" target="_blank" rel="noopener">✏️ 在 GitHub 上编辑此页</a></p>
   </div>
 
-  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
-  <section class="follow-card">
-    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
-    <div class="follow-grid">
-      <div class="follow-block">
-        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
-        <div class="follow-text">
-          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
-          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
-        </div>
-      </div>
-      <div class="follow-block">
-        <div class="follow-text">
-          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
-          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
-          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
-        </div>
-      </div>
-    </div>
-    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
-  </section>
-
-  <nav class="post-nav">
-    <a class="post-nav__prev" href="/2026/08/02/launcher3-05-drag-drop/">← Launcher3 源码精读（05）：拖拽机制</a>
-    <a class="post-nav__next" href="/2026/08/02/launcher3-08-folder/">Launcher3 源码精读（08）：文件夹机制 →</a>
-  </nav>
-</article>
+  <aside class="post-toc">
+    <button class="toc-toggle" id="toc-toggle">📑 目录</button>
+    <nav id="toc-list"></nav>
+  </aside>
+</div>
 
   </main>
 
@@ -592,5 +619,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

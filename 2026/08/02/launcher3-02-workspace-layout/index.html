@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,47 +13,56 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
+    
+<div class="post-layout">
+  <div class="post-main">
     <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">Launcher3 源码精读（02）：桌面布局</h1>
-    <div class="post-meta">
-      <span>📅 2026-08-02</span>
-      
-      <span>⏱️ 26分钟</span>
-      
-    </div>
-    <div class="post-tags">
-      
-        <a class="tag" href="/tags/AOSP/">#AOSP</a>
-      
-        <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
-      
-        <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
-      
-        <a class="tag" href="/tags/Framework/">#Framework</a>
-      
-    </div>
-  </header>
+      <header class="post-header">
+        <h1 class="post-title">Launcher3 源码精读（02）：桌面布局</h1>
+        <div class="post-meta">
+          <span>📅 2026-08-02</span>
+          
+          <span>⏱️ 26分钟</span>
+          
+        </div>
+        <div class="post-tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+          
+            <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
+          
+            <a class="tag" href="/tags/Framework/">#Framework</a>
+          
+        </div>
+      </header>
 
-  <div class="post-content">
-    <h1 id="Launcher3-桌面布局源码精读"><a href="#Launcher3-桌面布局源码精读" class="headerlink" title="Launcher3 桌面布局源码精读"></a>Launcher3 桌面布局源码精读</h1><blockquote>
+      <div class="post-content">
+        <h1 id="Launcher3-桌面布局源码精读"><a href="#Launcher3-桌面布局源码精读" class="headerlink" title="Launcher3 桌面布局源码精读"></a>Launcher3 桌面布局源码精读</h1><blockquote>
 <p>源码基线：<code>aosp-r4</code>（<code>packages/apps/Launcher3</code>）<br>本篇讲透一件事：<strong>一条数据库记录如何变成屏幕上一个确定像素位置的格子</strong>，并覆盖多屏滑动、拖拽让位、设备适配的全部机制。<br>涉及 11 个真实类：<code>PagedView</code> &#x2F; <code>Workspace</code> &#x2F; <code>WorkspaceLayoutManager</code> &#x2F; <code>CellLayout</code> &#x2F; <code>ShortcutAndWidgetContainer</code> &#x2F; <code>CellLayoutLayoutParams</code> &#x2F; <code>Hotseat</code> &#x2F; <code>GridOccupancy</code> &#x2F; <code>ReorderAlgorithm</code> &#x2F; <code>ViewCluster</code> &#x2F; <code>ItemConfiguration</code> &#x2F; <code>DeviceProfile</code> &#x2F; <code>InvariantDeviceProfile</code>。下面每一个字段名、方法签名、常量值都来自源码逐行核对。</p>
 </blockquote>
 <table>
@@ -751,35 +760,53 @@
 </tr>
 </tbody></table>
 
+      </div>
+    </article>
+
+    <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+    <section class="follow-card">
+      <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+      <div class="follow-grid">
+        <div class="follow-block">
+          <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+          <div class="follow-text">
+            <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+            <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+          </div>
+        </div>
+        <div class="follow-block">
+          <div class="follow-text">
+            <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+            <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+            <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+          </div>
+        </div>
+      </div>
+      <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+    </section>
+
+    <!-- ===== 社交分享按钮 ===== -->
+    <div class="post-share">
+      <span class="share-label">🔗 分享：</span>
+      <button class="share-btn" data-share="weibo">微博</button>
+      <button class="share-btn" data-share="qq">QQ</button>
+      <button class="share-btn" data-share="xhs">小红书</button>
+      <button class="share-btn" data-share="copy">复制链接</button>
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-nav__prev" href="/2026/08/02/launcher3-03-data-model/">← Launcher3 源码精读（03）：数据模型</a>
+      <a class="post-nav__next" href="/2026/08/02/launcher3-05-drag-drop/">Launcher3 源码精读（05）：拖拽机制 →</a>
+    </nav>
+
+    <p class="post-edit"><a href="https://github.com/soycodetrail/soycodetrail.github.io/blob/source/_posts/launcher3-02-workspace-layout.md" target="_blank" rel="noopener">✏️ 在 GitHub 上编辑此页</a></p>
   </div>
 
-  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
-  <section class="follow-card">
-    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
-    <div class="follow-grid">
-      <div class="follow-block">
-        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
-        <div class="follow-text">
-          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
-          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
-        </div>
-      </div>
-      <div class="follow-block">
-        <div class="follow-text">
-          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
-          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
-          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
-        </div>
-      </div>
-    </div>
-    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
-  </section>
-
-  <nav class="post-nav">
-    <a class="post-nav__prev" href="/2026/08/02/launcher3-00-overview/">← Launcher3 源码精读（00）：总览与阅读指南</a>
-    <a class="post-nav__next" href="/2026/08/02/launcher3-03-data-model/">Launcher3 源码精读（03）：数据模型 →</a>
-  </nav>
-</article>
+  <aside class="post-toc">
+    <button class="toc-toggle" id="toc-toggle">📑 目录</button>
+    <nav id="toc-list"></nav>
+  </aside>
+</div>
 
   </main>
 
@@ -795,5 +822,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

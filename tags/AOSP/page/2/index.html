@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,39 +13,50 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
     <section class="taxonomy">
   <h1 class="page-title"></h1>
   
     <article class="archive-item">
       <time class="archive-item__date">2026-08-02</time>
-      <a class="archive-item__title" href="/2026/08/02/launcher3-09-animation/">Launcher3 源码精读（09）：动画系统</a>
+      <a class="archive-item__title" href="/2026/08/02/launcher3-10-touch-gesture/">Launcher3 源码精读（10）：触摸与手势</a>
     </article>
   
     <article class="archive-item">
       <time class="archive-item__date">2026-08-02</time>
-      <a class="archive-item__title" href="/2026/08/02/launcher3-07-shortcuts-widgets/">Launcher3 源码精读（07）：快捷方式与小组件</a>
+      <a class="archive-item__title" href="/2026/08/02/launcher3-08-folder/">Launcher3 源码精读（08）：文件夹机制</a>
     </article>
   
     <article class="archive-item">
       <time class="archive-item__date">2026-08-02</time>
       <a class="archive-item__title" href="/2026/08/02/launcher3-14-launch-animation/">Launcher3 源码精读（14）：应用启动与远程动效时序图</a>
+    </article>
+  
+    <article class="archive-item">
+      <time class="archive-item__date">2026-08-02</time>
+      <a class="archive-item__title" href="/2026/08/02/launcher3-11-custom-view/">Launcher3 源码精读（11）：自定义视图</a>
     </article>
   
     <article class="archive-item">
@@ -56,11 +67,6 @@
     <article class="archive-item">
       <time class="archive-item__date">2026-08-02</time>
       <a class="archive-item__title" href="/2026/08/02/launcher3-12-icon-notification/">Launcher3 源码精读（12）：图标与通知系统</a>
-    </article>
-  
-    <article class="archive-item">
-      <time class="archive-item__date">2026-08-02</time>
-      <a class="archive-item__title" href="/2026/08/02/launcher3-11-custom-view/">Launcher3 源码精读（11）：自定义视图</a>
     </article>
   
     <article class="archive-item">
@@ -100,5 +106,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

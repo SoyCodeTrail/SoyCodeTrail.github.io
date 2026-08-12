@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,47 +13,56 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
+    
+<div class="post-layout">
+  <div class="post-main">
     <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">Launcher3 源码精读（11）：自定义视图</h1>
-    <div class="post-meta">
-      <span>📅 2026-08-02</span>
-      
-      <span>⏱️ 21分钟</span>
-      
-    </div>
-    <div class="post-tags">
-      
-        <a class="tag" href="/tags/AOSP/">#AOSP</a>
-      
-        <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
-      
-        <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
-      
-        <a class="tag" href="/tags/Framework/">#Framework</a>
-      
-    </div>
-  </header>
+      <header class="post-header">
+        <h1 class="post-title">Launcher3 源码精读（11）：自定义视图</h1>
+        <div class="post-meta">
+          <span>📅 2026-08-02</span>
+          
+          <span>⏱️ 21分钟</span>
+          
+        </div>
+        <div class="post-tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+          
+            <a class="tag" href="/tags/Launcher3/">#Launcher3</a>
+          
+            <a class="tag" href="/tags/Framework/">#Framework</a>
+          
+        </div>
+      </header>
 
-  <div class="post-content">
-    <h1 id="Launcher3-自定义视图体系"><a href="#Launcher3-自定义视图体系" class="headerlink" title="Launcher3 自定义视图体系"></a>Launcher3 自定义视图体系</h1><p>Launcher3 的整个界面几乎全部由自定义 View 构成，从桌面图标、文件夹、AllApps 列表，到拖拽时弹出的删除栏、长按弹出的快捷方式菜单、底部的 Snackbar 提示，每一个视觉元素背后都有一个对应的自定义视图类。这些视图并不是随意散落的，而是围绕几个核心基类组织成一套清晰的层级体系：<code>LauncherRootView</code> 是整棵视图树的根，<code>BaseDragLayer</code> 负责承载所有浮层，<code>AbstractFloatingView</code> 抽象出所有「弹出层」的共同行为，<code>BubbleTextView</code> 则是几乎所有图标（桌面、AllApps、文件夹、Taskbar）的统一载体。</p>
+      <div class="post-content">
+        <h1 id="Launcher3-自定义视图体系"><a href="#Launcher3-自定义视图体系" class="headerlink" title="Launcher3 自定义视图体系"></a>Launcher3 自定义视图体系</h1><p>Launcher3 的整个界面几乎全部由自定义 View 构成，从桌面图标、文件夹、AllApps 列表，到拖拽时弹出的删除栏、长按弹出的快捷方式菜单、底部的 Snackbar 提示，每一个视觉元素背后都有一个对应的自定义视图类。这些视图并不是随意散落的，而是围绕几个核心基类组织成一套清晰的层级体系：<code>LauncherRootView</code> 是整棵视图树的根，<code>BaseDragLayer</code> 负责承载所有浮层，<code>AbstractFloatingView</code> 抽象出所有「弹出层」的共同行为，<code>BubbleTextView</code> 则是几乎所有图标（桌面、AllApps、文件夹、Taskbar）的统一载体。</p>
 <p>理解这套视图体系，关键在于抓住三个设计要点：第一，Launcher 不复用系统的通用控件，而是针对桌面场景做了大量性能与交互定制；第二，所有「会弹出、会关闭」的界面被抽象成一个统一的浮层模型，由 <code>DragLayer</code> 统一管理生命周期；第三，图标视图通过数据绑定（<code>applyFromItemInfo</code>）+ 缓存加载（<code>IconCache</code>）+ 自绘制（红点、运行指示器）三段式工作，把「数据→视图」的链路解耦得很干净。本文按从核心到外围的顺序，逐个拆解这些视图的实现与设计意图。</p>
 <h2 id="一、BubbleTextView：桌面图标的统一载体"><a href="#一、BubbleTextView：桌面图标的统一载体" class="headerlink" title="一、BubbleTextView：桌面图标的统一载体"></a>一、BubbleTextView：桌面图标的统一载体</h2><h3 id="1-1-为什么继承-TextView-而不是自定义-View"><a href="#1-1-为什么继承-TextView-而不是自定义-View" class="headerlink" title="1.1 为什么继承 TextView 而不是自定义 View"></a>1.1 为什么继承 TextView 而不是自定义 View</h3><p><code>BubbleTextView</code> 是 Launcher3 里最核心、出现频率最高的视图，桌面上每一个应用图标、AllApps 列表里的每一行、文件夹里的每一个图标、Taskbar 上的每一个应用，底层都是同一个类的实例。它的声明是这样的：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 继承 TextView 而非自定义 View，复用文字测量/绘制/省略号/无障碍能力</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BubbleTextView</span> <span class="keyword">extends</span> <span class="title class_">TextView</span> <span class="keyword">implements</span> <span class="title class_">ItemInfoUpdateReceiver</span>,</span><br><span class="line">        FloatingIconViewCompanion, DraggableView, Reorderable, Poppable &#123;</span><br></pre></td></tr></table></figure>
@@ -398,35 +407,53 @@
 <p><strong>问 3：ArrowTipView 在屏幕边界自动翻转箭头方向，这个「翻转」是怎么实现的？</strong></p>
 <p>答：箭头是个 <code>ShapeDrawable</code>，由 <code>TriangleShape.create(width, height, isPointingUp)</code> 生成，<code>isPointingUp</code> 决定三角形朝向。检测到「朝上但顶部放不下」或「朝下但底部放不下」时，调用 <code>updateArrowTipInView(!isPointingUp)</code> 重新生成相反朝向的三角形 drawable，并调整它在 LinearLayout 中的位置（朝上时 addView 到 index 0，朝下时 addView 到 index 1）和负 margin（隐藏底&#x2F;顶圆角）。整个翻转是重建 drawable + 调位置，不涉及动画过渡。</p>
 
+      </div>
+    </article>
+
+    <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+    <section class="follow-card">
+      <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+      <div class="follow-grid">
+        <div class="follow-block">
+          <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+          <div class="follow-text">
+            <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+            <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+          </div>
+        </div>
+        <div class="follow-block">
+          <div class="follow-text">
+            <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+            <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+            <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+          </div>
+        </div>
+      </div>
+      <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+    </section>
+
+    <!-- ===== 社交分享按钮 ===== -->
+    <div class="post-share">
+      <span class="share-label">🔗 分享：</span>
+      <button class="share-btn" data-share="weibo">微博</button>
+      <button class="share-btn" data-share="qq">QQ</button>
+      <button class="share-btn" data-share="xhs">小红书</button>
+      <button class="share-btn" data-share="copy">复制链接</button>
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-nav__prev" href="/2026/08/02/launcher3-14-launch-animation/">← Launcher3 源码精读（14）：应用启动与远程动效时序图</a>
+      <a class="post-nav__next" href="/2026/08/02/launcher3-13-package-management/">Launcher3 源码精读（13）：包管理与安装 →</a>
+    </nav>
+
+    <p class="post-edit"><a href="https://github.com/soycodetrail/soycodetrail.github.io/blob/source/_posts/launcher3-11-custom-view.md" target="_blank" rel="noopener">✏️ 在 GitHub 上编辑此页</a></p>
   </div>
 
-  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
-  <section class="follow-card">
-    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
-    <div class="follow-grid">
-      <div class="follow-block">
-        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
-        <div class="follow-text">
-          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
-          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
-        </div>
-      </div>
-      <div class="follow-block">
-        <div class="follow-text">
-          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
-          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
-          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
-        </div>
-      </div>
-    </div>
-    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
-  </section>
-
-  <nav class="post-nav">
-    <a class="post-nav__prev" href="/2026/08/02/launcher3-12-icon-notification/">← Launcher3 源码精读（12）：图标与通知系统</a>
-    <a class="post-nav__next" href="/2026/07/28/aosp-build-systemui/">在 Apple Silicon Mac 上编译 AOSP SystemUI：59 分钟从零到 APK →</a>
-  </nav>
-</article>
+  <aside class="post-toc">
+    <button class="toc-toggle" id="toc-toggle">📑 目录</button>
+    <nav id="toc-list"></nav>
+  </aside>
+</div>
 
   </main>
 
@@ -442,5 +469,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

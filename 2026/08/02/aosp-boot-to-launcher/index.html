@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,55 +13,64 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
+    
+<div class="post-layout">
+  <div class="post-main">
     <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">从按下开机键到桌面出现：Android 系统启动全流程深度解析（AOSP android-16.0.0_r4）</h1>
-    <div class="post-meta">
-      <span>📅 2026-08-02</span>
-      
-      <span>⏱️ 45分钟</span>
-      
-    </div>
-    <div class="post-tags">
-      
-        <a class="tag" href="/tags/AOSP/">#AOSP</a>
-      
-        <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
-      
-        <a class="tag" href="/tags/Android/">#Android</a>
-      
-        <a class="tag" href="/tags/%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/">#系统启动</a>
-      
-        <a class="tag" href="/tags/init/">#init</a>
-      
-        <a class="tag" href="/tags/Zygote/">#Zygote</a>
-      
-        <a class="tag" href="/tags/SystemServer/">#SystemServer</a>
-      
-        <a class="tag" href="/tags/Launcher/">#Launcher</a>
-      
-    </div>
-  </header>
+      <header class="post-header">
+        <h1 class="post-title">从按下开机键到桌面出现：Android 系统启动全流程深度解析（AOSP android-16.0.0_r4）</h1>
+        <div class="post-meta">
+          <span>📅 2026-08-02</span>
+          
+          <span>⏱️ 45分钟</span>
+          
+        </div>
+        <div class="post-tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/Android/">#Android</a>
+          
+            <a class="tag" href="/tags/%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/">#系统启动</a>
+          
+            <a class="tag" href="/tags/init/">#init</a>
+          
+            <a class="tag" href="/tags/Zygote/">#Zygote</a>
+          
+            <a class="tag" href="/tags/SystemServer/">#SystemServer</a>
+          
+            <a class="tag" href="/tags/Launcher/">#Launcher</a>
+          
+            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+          
+        </div>
+      </header>
 
-  <div class="post-content">
-    <h1 id="从按下开机键到桌面出现"><a href="#从按下开机键到桌面出现" class="headerlink" title="从按下开机键到桌面出现"></a>从按下开机键到桌面出现</h1><p>你按下手机电源键的那一刻，背后发生了一场精密的多进程接力赛。从 BootROM 里的硬件初始化，到 Linux 内核加载，再到 init 进程拉起整个 Java 世界，最后 Launcher 把图标画到屏幕上——整个过程不到 30 秒，却涉及上百个源码文件、十几个进程、两次关键的进程 fork。</p>
+      <div class="post-content">
+        <h1 id="从按下开机键到桌面出现"><a href="#从按下开机键到桌面出现" class="headerlink" title="从按下开机键到桌面出现"></a>从按下开机键到桌面出现</h1><p>你按下手机电源键的那一刻，背后发生了一场精密的多进程接力赛。从 BootROM 里的硬件初始化，到 Linux 内核加载，再到 init 进程拉起整个 Java 世界，最后 Launcher 把图标画到屏幕上——整个过程不到 30 秒，却涉及上百个源码文件、十几个进程、两次关键的进程 fork。</p>
 <p>这篇文章基于 <strong>AOSP android-16.0.0_r4</strong> 源码，把整条链路拆成 7 个阶段，每一步都给出源码文件路径和关键代码段。读完你就能回答面试官那个经典问题：”从开机到 Launcher 启动，中间发生了什么？”</p>
 <h2 id="全局视角：一张图看懂-7-个阶段"><a href="#全局视角：一张图看懂-7-个阶段" class="headerlink" title="全局视角：一张图看懂 7 个阶段"></a>全局视角：一张图看懂 7 个阶段</h2><p><img src="https://soycodetrail.top/images/aosp-boot/aosp-boot-architecture.png" alt="Android 系统启动架构图"></p>
 <p>上图是整个启动链路的分层架构。从下到上：硬件层（BootROM&#x2F;Bootloader&#x2F;Kernel）→ native 层（init&#x2F;Zygote）→ Java 系统服务层（SystemServer&#x2F;AMS&#x2F;PMS&#x2F;WMS）→ 应用层（Launcher）。层与层之间通过 fork 或 IPC 传递控制权。</p>
@@ -288,35 +297,53 @@
 <p>每个阶段的源码位置都标出来了。配合文章配套的<strong>时序图</strong>和<strong>类图</strong>，你可以顺着调用链一步步在 AOSP 源码里跟读。</p>
 <p>理解这条链路，不仅是面试必备，也是排查启动慢、开机黑屏、Launcher 崩溃等问题的基础。</p>
 
+      </div>
+    </article>
+
+    <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+    <section class="follow-card">
+      <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+      <div class="follow-grid">
+        <div class="follow-block">
+          <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+          <div class="follow-text">
+            <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+            <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+          </div>
+        </div>
+        <div class="follow-block">
+          <div class="follow-text">
+            <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+            <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+            <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+          </div>
+        </div>
+      </div>
+      <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+    </section>
+
+    <!-- ===== 社交分享按钮 ===== -->
+    <div class="post-share">
+      <span class="share-label">🔗 分享：</span>
+      <button class="share-btn" data-share="weibo">微博</button>
+      <button class="share-btn" data-share="qq">QQ</button>
+      <button class="share-btn" data-share="xhs">小红书</button>
+      <button class="share-btn" data-share="copy">复制链接</button>
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-nav__prev" href="/2026/08/03/claude-code-diagram-skills/">← 用 5 种 AI 绘图 Skill 画 Claude Code 架构图——效果对比与选型指南</a>
+      <a class="post-nav__next" href="/2026/08/02/launcher3-00-overview/">Launcher3 源码精读（00）：总览与阅读指南 →</a>
+    </nav>
+
+    <p class="post-edit"><a href="https://github.com/soycodetrail/soycodetrail.github.io/blob/source/_posts/aosp-boot-to-launcher.md" target="_blank" rel="noopener">✏️ 在 GitHub 上编辑此页</a></p>
   </div>
 
-  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
-  <section class="follow-card">
-    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
-    <div class="follow-grid">
-      <div class="follow-block">
-        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
-        <div class="follow-text">
-          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
-          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
-        </div>
-      </div>
-      <div class="follow-block">
-        <div class="follow-text">
-          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
-          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
-          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
-        </div>
-      </div>
-    </div>
-    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
-  </section>
-
-  <nav class="post-nav">
-    <a class="post-nav__prev" href="/2026/08/03/claude-code-diagram-skills/">← 用 5 种 AI 绘图 Skill 画 Claude Code 架构图——效果对比与选型指南</a>
-    <a class="post-nav__next" href="/2026/08/02/launcher3-00-overview/">Launcher3 源码精读（00）：总览与阅读指南 →</a>
-  </nav>
-</article>
+  <aside class="post-toc">
+    <button class="toc-toggle" id="toc-toggle">📑 目录</button>
+    <nav id="toc-list"></nav>
+  </aside>
+</div>
 
   </main>
 
@@ -332,5 +359,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

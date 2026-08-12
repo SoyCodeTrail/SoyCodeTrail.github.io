@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,47 +13,56 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
+    
+<div class="post-layout">
+  <div class="post-main">
     <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">在 Apple Silicon Mac 上编译 AOSP SystemUI：59 分钟从零到 APK</h1>
-    <div class="post-meta">
-      <span>📅 2026-07-28</span>
-      
-      <span>⏱️ 15分钟</span>
-      
-    </div>
-    <div class="post-tags">
-      
-        <a class="tag" href="/tags/AOSP/">#AOSP</a>
-      
-        <a class="tag" href="/tags/%E7%BC%96%E8%AF%91/">#编译</a>
-      
-        <a class="tag" href="/tags/SystemUI/">#SystemUI</a>
-      
-        <a class="tag" href="/tags/Docker/">#Docker</a>
-      
-    </div>
-  </header>
+      <header class="post-header">
+        <h1 class="post-title">在 Apple Silicon Mac 上编译 AOSP SystemUI：59 分钟从零到 APK</h1>
+        <div class="post-meta">
+          <span>📅 2026-07-28</span>
+          
+          <span>⏱️ 15分钟</span>
+          
+        </div>
+        <div class="post-tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/%E7%BC%96%E8%AF%91/">#编译</a>
+          
+            <a class="tag" href="/tags/SystemUI/">#SystemUI</a>
+          
+            <a class="tag" href="/tags/Docker/">#Docker</a>
+          
+        </div>
+      </header>
 
-  <div class="post-content">
-    <p>手上是台 Apple M3 Max，想把 AOSP 的 SystemUI 单独编译出来跑一跑。折腾了三天，踩了一堆坑，最后 59 分钟跑完，产物是个 166MB 的 SystemUI.apk。把整个过程记下来，免得下次再栽同一个坑。</p>
+      <div class="post-content">
+        <p>手上是台 Apple M3 Max，想把 AOSP 的 SystemUI 单独编译出来跑一跑。折腾了三天，踩了一堆坑，最后 59 分钟跑完，产物是个 166MB 的 SystemUI.apk。把整个过程记下来，免得下次再栽同一个坑。</p>
 <h2 id="为什么-Apple-Silicon-不能直接编译-AOSP"><a href="#为什么-Apple-Silicon-不能直接编译-AOSP" class="headerlink" title="为什么 Apple Silicon 不能直接编译 AOSP"></a>为什么 Apple Silicon 不能直接编译 AOSP</h2><p>先说结论：<strong>Mac 上（不管 Intel 还是 Apple Silicon）永远没法原生编译 AOSP</strong>。</p>
 <p>AOSP 的 build 系统（Soong + Ninja）依赖一套 <code>linux-arm64</code> &#x2F; <code>linux-x86_64</code> 的交叉编译工具链，这套东西只在 Linux 上跑。macOS 上没有，Google 也从没打算支持。官方文档里那句 “macOS 需要额外装 Xcode + case-sensitive 磁盘” 是给老版本留的过时说明，Android 14 之后基本就别想了。</p>
 <p>Apple Silicon 还多一层麻烦：就算勉强在 Linux 上跑，原生 arm64 容器里 AOSP 的很多 prebuilt 工具链（特别是 <code>prebuilts/clang</code>、<code>prebuilts/build-tools</code>）只放了 x86_64 的二进制，arm64 的根本没编出来。直接跑就是 <code>exec format error</code>。</p>
@@ -271,35 +280,53 @@
 </ul>
 <p>最终结果：59 分钟编出 166MB 的 SystemUI.apk，versionCode 36，versionName 16，跑在自编的 Baklava userdebug 镜像上，状态栏、通知、锁屏全部正常。这条路走通一次，后面改 SystemUI 源码增量编译只要 30 秒。</p>
 
+      </div>
+    </article>
+
+    <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+    <section class="follow-card">
+      <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+      <div class="follow-grid">
+        <div class="follow-block">
+          <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+          <div class="follow-text">
+            <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+            <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+          </div>
+        </div>
+        <div class="follow-block">
+          <div class="follow-text">
+            <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+            <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+            <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+          </div>
+        </div>
+      </div>
+      <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+    </section>
+
+    <!-- ===== 社交分享按钮 ===== -->
+    <div class="post-share">
+      <span class="share-label">🔗 分享：</span>
+      <button class="share-btn" data-share="weibo">微博</button>
+      <button class="share-btn" data-share="qq">QQ</button>
+      <button class="share-btn" data-share="xhs">小红书</button>
+      <button class="share-btn" data-share="copy">复制链接</button>
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-nav__prev" href="/2026/07/28/ai-coding-guide-2026/">← 2026年，零基础怎么学 AI 和编程</a>
+      <a class="post-nav__next" href="/2026/07/28/aosp-get-source/">在 macOS 上获取 Android 16 源码：从零到 196GB 完整拉取 →</a>
+    </nav>
+
+    <p class="post-edit"><a href="https://github.com/soycodetrail/soycodetrail.github.io/blob/source/_posts/aosp-build-systemui.md" target="_blank" rel="noopener">✏️ 在 GitHub 上编辑此页</a></p>
   </div>
 
-  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
-  <section class="follow-card">
-    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
-    <div class="follow-grid">
-      <div class="follow-block">
-        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
-        <div class="follow-text">
-          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
-          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
-        </div>
-      </div>
-      <div class="follow-block">
-        <div class="follow-text">
-          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
-          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
-          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
-        </div>
-      </div>
-    </div>
-    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
-  </section>
-
-  <nav class="post-nav">
-    <a class="post-nav__prev" href="/2026/08/02/launcher3-11-custom-view/">← Launcher3 源码精读（11）：自定义视图</a>
-    <a class="post-nav__next" href="/2026/07/28/ai-coding-guide-2026/">2026年，零基础怎么学 AI 和编程 →</a>
-  </nav>
-</article>
+  <aside class="post-toc">
+    <button class="toc-toggle" id="toc-toggle">📑 目录</button>
+    <nav id="toc-list"></nav>
+  </aside>
+</div>
 
   </main>
 
@@ -315,5 +342,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>

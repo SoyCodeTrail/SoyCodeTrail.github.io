@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,47 +13,56 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" disabled>
   <link rel="alternate" type="application/atom+xml" title="豆奶与程序猫的技术博客" href="/atom.xml">
   <link rel="sitemap" href="/sitemap.xml" type="application/xml">
 <meta name="generator" content="Hexo 7.3.0"></head>
 <body>
+  <div class="reading-progress" id="reading-progress"></div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a class="site-title" href="/">豆奶与程序猫的技术博客</a>
-      <nav class="site-nav">
+      <button class="nav-toggle" id="nav-toggle" aria-label="菜单">☰</button>
+      <nav class="site-nav" id="site-nav">
         <a href="/">首页</a>
         <a href="/archives">归档</a>
         <a href="/tags">标签</a>
         <a href="/about">关于</a>
+        <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="theme-toggle" aria-label="切换主题">🌙</button>
       </nav>
     </div>
   </header>
 
-  <main class="container site-main">
+  <main class="site-main">
+    
+<div class="post-layout">
+  <div class="post-main">
     <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">在 macOS 上获取 Android 16 源码：从零到 196GB 完整拉取</h1>
-    <div class="post-meta">
-      <span>📅 2026-07-28</span>
-      
-      <span>⏱️ 12分钟</span>
-      
-    </div>
-    <div class="post-tags">
-      
-        <a class="tag" href="/tags/AOSP/">#AOSP</a>
-      
-        <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
-      
-        <a class="tag" href="/tags/repo/">#repo</a>
-      
-        <a class="tag" href="/tags/%E6%B8%85%E5%8D%8E%E9%95%9C%E5%83%8F/">#清华镜像</a>
-      
-    </div>
-  </header>
+      <header class="post-header">
+        <h1 class="post-title">在 macOS 上获取 Android 16 源码：从零到 196GB 完整拉取</h1>
+        <div class="post-meta">
+          <span>📅 2026-07-28</span>
+          
+          <span>⏱️ 12分钟</span>
+          
+        </div>
+        <div class="post-tags">
+          
+            <a class="tag" href="/tags/AOSP/">#AOSP</a>
+          
+            <a class="tag" href="/tags/%E6%BA%90%E7%A0%81/">#源码</a>
+          
+            <a class="tag" href="/tags/repo/">#repo</a>
+          
+            <a class="tag" href="/tags/%E6%B8%85%E5%8D%8E%E9%95%9C%E5%83%8F/">#清华镜像</a>
+          
+        </div>
+      </header>
 
-  <div class="post-content">
-    <p>搞 Android 的迟早会碰到这一步：光看 SDK 文档不够用了，得翻 Framework 源码才能搞清楚一个 <code>Activity</code> 到底是怎么 start 起来的，或者想自己编一个 SystemUI 看看改完啥效果。这时候就得把整个 AOSP（Android Open Source Project）源码拉下来。</p>
+      <div class="post-content">
+        <p>搞 Android 的迟早会碰到这一步：光看 SDK 文档不够用了，得翻 Framework 源码才能搞清楚一个 <code>Activity</code> 到底是怎么 start 起来的，或者想自己编一个 SystemUI 看看改完啥效果。这时候就得把整个 AOSP（Android Open Source Project）源码拉下来。</p>
 <p>这篇记一下在 macOS Apple Silicon（M1&#x2F;M2&#x2F;M3）上把 Android 16 完整源码搞到本地的全过程，包括踩过的坑。最终拉下来的体积是 <strong>196GB</strong>，别被这个数字吓到，下面一步一步来。</p>
 <h2 id="为什么非得要源码"><a href="#为什么非得要源码" class="headerlink" title="为什么非得要源码"></a>为什么非得要源码</h2><p>Android SDK 给的是编译好的 jar 和 API，看不到实现。遇到下面这些场景就只能上源码：</p>
 <ul>
@@ -177,35 +186,53 @@
 <h2 id="拉完之后"><a href="#拉完之后" class="headerlink" title="拉完之后"></a>拉完之后</h2><p>源码到手只是第一步。下一步通常是配编译环境（装 OpenJDK、设 <code>lunch</code> 选 target），然后 <code>m</code> 全量编译。那又是另一个大坑，Apple Silicon 上编 AOSP 还得用 <code>arm64</code> 的 target，x86 的 target 跑不动，这些留到下一篇再写。</p>
 <p>现在先把源码稳稳拉下来，能 grep、能看、能跳转，已经够啃好一阵子了。</p>
 
+      </div>
+    </article>
+
+    <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
+    <section class="follow-card">
+      <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
+      <div class="follow-grid">
+        <div class="follow-block">
+          <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
+          <div class="follow-text">
+            <p class="follow-name">💬 微信：Yishisiweikongjian</p>
+            <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
+          </div>
+        </div>
+        <div class="follow-block">
+          <div class="follow-text">
+            <p class="follow-name">📕 小红书：豆奶与程序猫</p>
+            <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
+            <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
+          </div>
+        </div>
+      </div>
+      <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
+    </section>
+
+    <!-- ===== 社交分享按钮 ===== -->
+    <div class="post-share">
+      <span class="share-label">🔗 分享：</span>
+      <button class="share-btn" data-share="weibo">微博</button>
+      <button class="share-btn" data-share="qq">QQ</button>
+      <button class="share-btn" data-share="xhs">小红书</button>
+      <button class="share-btn" data-share="copy">复制链接</button>
+    </div>
+
+    <nav class="post-nav">
+      <a class="post-nav__prev" href="/2026/07/28/aosp-build-systemui/">← 在 Apple Silicon Mac 上编译 AOSP SystemUI：59 分钟从零到 APK</a>
+      <a class="post-nav__next" href="/2026/07/28/aosp-read-source/">AOSP 源码阅读环境配置：Android Studio 跳转 + VSCode clangd 双工具链 →</a>
+    </nav>
+
+    <p class="post-edit"><a href="https://github.com/soycodetrail/soycodetrail.github.io/blob/source/_posts/aosp-get-source.md" target="_blank" rel="noopener">✏️ 在 GitHub 上编辑此页</a></p>
   </div>
 
-  <!-- ===== 涨粉社交区块：每篇文章末尾自动注入 ===== -->
-  <section class="follow-card">
-    <h3 class="follow-title">📬 喜欢这篇文章？关注我，获取更多技术干货</h3>
-    <div class="follow-grid">
-      <div class="follow-block">
-        <img src="/images/wechat-qrcode.jpeg" alt="微信二维码" class="follow-qr">
-        <div class="follow-text">
-          <p class="follow-name">💬 微信：Yishisiweikongjian</p>
-          <p class="follow-tip">扫码或搜索微信号添加，备注「学习」更快通过</p>
-        </div>
-      </div>
-      <div class="follow-block">
-        <div class="follow-text">
-          <p class="follow-name">📕 小红书：豆奶与程序猫</p>
-          <p class="follow-tip">搜索「豆奶与程序猫」关注，私信“邀请码”领学习资源</p>
-          <a class="follow-btn" href="https://www.xiaohongshu.com/search_result?keyword=%E8%B1%86%E5%A5%B6%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%8C%AB" target="_blank" rel="noopener">前往小红书关注 →</a>
-        </div>
-      </div>
-    </div>
-    <p class="follow-email">📧 合作 / 交流：1019296134@qq.com</p>
-  </section>
-
-  <nav class="post-nav">
-    <a class="post-nav__prev" href="/2026/07/28/ai-coding-guide-2026/">← 2026年，零基础怎么学 AI 和编程</a>
-    <a class="post-nav__next" href="/2026/07/28/aosp-read-source/">AOSP 源码阅读环境配置：Android Studio 跳转 + VSCode clangd 双工具链 →</a>
-  </nav>
-</article>
+  <aside class="post-toc">
+    <button class="toc-toggle" id="toc-toggle">📑 目录</button>
+    <nav id="toc-list"></nav>
+  </aside>
+</div>
 
   </main>
 
@@ -221,5 +248,17 @@
       </p>
     </div>
   </footer>
+
+  <!-- 搜索弹窗 -->
+  <div class="search-modal" id="search-modal" hidden>
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章标题 / 内容 / 标签…  (按 / 快速打开，Esc 关闭)" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="back-to-top" aria-label="回到顶部" hidden>↑</button>
+
+  <script src="/js/theme.js" defer></script>
 </body>
 </html>
